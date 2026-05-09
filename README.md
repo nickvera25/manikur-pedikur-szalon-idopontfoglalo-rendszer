@@ -22,8 +22,8 @@ npm install
 A projekt gyökérmappájában hozzon létre egy fájlt .env néven. Másolja be az alábbi adatokat, és módosítsa az adatbázis nevét, illetve jelszavát a saját helyi (XAMPP) beállításainak megfelelően:
 
 PORT=3000
-DATABASE_URL="mysql://root:@localhost:3306/nailsbyvera"
-JWT_SECRET="egy_nagyon_titkos_kulcs_a_fejleszteshez"
+DATABASE_URL="mysql://root:@localhost:3306/manikur_pedikur_szalon"
+JWT_SECRET="valami_nagyon_hosszu_es_veletlenszeru_szoveg_12345"
 
 (Megjegyzés: A XAMPP alapértelmezett MySQL felhasználóneve root, jelszava pedig üres.)
 
