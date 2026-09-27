@@ -1,25 +1,26 @@
+// backend/routes/authRoutes.js
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const nodemailer = require('nodemailer');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
+const emailService = require('../services/emailService');
 
-// --- 1. ITT LEGYEN A VÉDŐ MIDDLEWARE (A FÁJL ELEJÉN!) ---
+// Védő middleware
 const verifyToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     if (!authHeader) return res.json({ success: false, message: "Nincs bejelentkezve!" });
     
     const token = authHeader.split(" ")[1]; 
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET || 'titokkulcs', (err, decoded) => {
         if (err) return res.json({ success: false, message: "Érvénytelen vagy lejárt token!" });
         req.user = decoded; 
         next();
     });
 };
 
-// Regisztrációs végpont
+// Regisztrációs végpont (Telefonszám regex védelemmel)
 router.post('/register', async (req, res) => {
     const { vezeteknev, keresztnev, telefon, email, jelszo } = req.body;
 
@@ -30,6 +31,14 @@ router.post('/register', async (req, res) => {
 
         if (letezoFelhasznalo) {
             return res.json({ success: false, message: "Ezzel az e-mail címmel már regisztráltak!" });
+        }
+
+        const phoneRegex = /^\+36\d{9}$/;
+        if (!phoneRegex.test(telefon)) {
+            return res.status(400).json({ 
+                success: false, 
+                message: "Érvénytelen telefonszám formátum! A számnak +36-tal kell kezdődnie és pontosan 9 számjegyet kell követnie (pl. +36301234567)." 
+            });
         }
 
         const titkositottJelszo = await bcrypt.hash(jelszo, 10);
@@ -74,9 +83,7 @@ router.post('/login', async (req, res) => {
             where: { email: email },
             include: {
                 szerepkorok: {
-                    include: {
-                        szerepkor: true
-                    }
+                    include: { szerepkor: true }
                 }
             }
         });
@@ -92,7 +99,7 @@ router.post('/login', async (req, res) => {
 
         const token = jwt.sign(
             { id: felhasznalo.felhasznalo_id, email: felhasznalo.email }, 
-            process.env.JWT_SECRET, 
+            process.env.JWT_SECRET || 'titokkulcs', 
             { expiresIn: '1h' }
         );
 
@@ -116,7 +123,7 @@ router.post('/login', async (req, res) => {
     }
 });
 
-// Kényszerített jelszóváltoztatás végpont
+// Kényszerített jelszóváltoztatás
 router.post('/force-password-change', verifyToken, async (req, res) => {
     const userId = req.user.id || req.user.felhasznalo_id; 
     const { ujJelszo } = req.body;
@@ -143,9 +150,7 @@ router.post('/force-password-change', verifyToken, async (req, res) => {
     }
 });
 
-// --- PROFIL KEZELÉSI VÉGPONTOK ---
-
-// 1. A bejelentkezett felhasználó adatainak lekérése
+// Profil adatok lekérése
 router.get('/profile', verifyToken, async (req, res) => {
     try {
         const felhasznalo = await prisma.felhasznalok.findUnique({
@@ -158,7 +163,7 @@ router.get('/profile', verifyToken, async (req, res) => {
     }
 });
 
-// 2. Személyes adatok frissítése
+// Személyes adatok frissítése
 router.put('/profile/update', verifyToken, async (req, res) => {
     const { vezeteknev, keresztnev, telefon, email } = req.body;
     try {
@@ -172,7 +177,7 @@ router.put('/profile/update', verifyToken, async (req, res) => {
     }
 });
 
-// 3. Jelszó módosítása
+// Jelszó módosítása bejelentkezve
 router.put('/profile/password', verifyToken, async (req, res) => {
     const { regiJelszo, ujJelszo } = req.body;
 
@@ -196,23 +201,22 @@ router.put('/profile/password', verifyToken, async (req, res) => {
     }
 });
 
-// 4. Elfelejtett jelszó (Token generálás)
+// 4. ELFELEJTETT JELSZÓ (Éles e-mail küldés a tokenes linkkel!)
 router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {
         const user = await prisma.felhasznalok.findUnique({ where: { email } });
         if (!user) return res.json({ success: false, message: "Ezzel az e-mail címmel nincs fiók regisztrálva!" });
 
-        const resetToken = jwt.sign({ id: user.felhasznalo_id }, process.env.JWT_SECRET, { expiresIn: '15m' });
-        const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
+        const resetToken = jwt.sign({ id: user.felhasznalo_id }, process.env.JWT_SECRET || 'titokkulcs', { expiresIn: '1h' });
 
-        console.log("-----------------------------------------");
-        console.log("JELSZÓ VISSZAÁLLÍTÓ LINK:", resetLink);
-        console.log("-----------------------------------------");
+        // Kiküldjük az éles formázott levelet a Gmailen keresztül
+        await emailService.sendPasswordReset(user.email, resetToken);
 
         res.json({ success: true, message: "A visszaállító linket elküldtük az e-mail címedre!" });
     } catch (error) {
-        res.json({ success: false, message: "Hiba történt a folyamat során." });
+        console.error("Hiba az e-mail küldésekor:", error);
+        res.status(500).json({ success: false, message: "Nem sikerült elküldeni az e-mailt. Ellenőrizd a szerver beállításait!" });
     }
 });
 
@@ -220,7 +224,7 @@ router.post('/forgot-password', async (req, res) => {
 router.post('/reset-password', async (req, res) => {
     const { token, ujJelszo } = req.body;
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'titokkulcs');
         const user = await prisma.felhasznalok.findUnique({ where: { felhasznalo_id: decoded.id } });
         
         const egyezik = await bcrypt.compare(ujJelszo, user.jelszo);

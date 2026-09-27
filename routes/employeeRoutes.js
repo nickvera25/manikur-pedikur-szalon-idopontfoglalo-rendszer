@@ -5,6 +5,7 @@ const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 const dayjs = require('dayjs');
+const emailService = require('../services/emailService');
 
 // Token ellenőrző middleware
 const verifyToken = (req, res, next) => {
@@ -137,16 +138,15 @@ router.post('/szabadsagok', verifyToken, async (req, res) => {
                 }
             });
 
-            // Terminál e-mail szimuláció a lemondásról
-            console.log("\n=======================================================");
-            console.log("⚠️  [SZIMULÁLT E-MAIL] - FOGLALÁS TÖRÖLVE SZABADSÁG MIATT");
-            console.log(`Címzett: ${booking.vendeg.email} (${booking.vendeg.vezeteknev} ${booking.vendeg.keresztnev})`);
-            console.log(`Tárgy:   Időpont törlése a szalon részéről`);
-            console.log("-------------------------------------------------------");
-            console.log(`Szolgáltatás: ${booking.szolgaltatas.szolgaltatas_neve}`);
-            console.log(`Időpont:      ${new Date(booking.kezdo_idopont).toLocaleString('hu-HU')}`);
-            console.log(`Indok:        Szakember távolléte (${megjegyzes || 'Szabadság'})`);
-            console.log("=======================================================\n");
+            // Éles lemondó e-mail küldése az ütköző vendégnek
+            if (booking.vendeg && booking.vendeg.email) {
+                emailService.sendCancellation(booking.vendeg.email, {
+                    vendegNev: `${booking.vendeg.vezeteknev} ${booking.vendeg.keresztnev}`,
+                    szolgaltatasNev: booking.szolgaltatas.szolgaltatas_neve,
+                    idopont: booking.kezdo_idopont,
+                    indok: `A szakember váratlan távolléte / szabadsága miatt (${megjegyzes || 'Szabadság'}). Kérjük, válassz másik időpontot!`
+                }).catch(err => console.error("E-mail küldési hiba szabadság miatti törléskor:", err));
+            }
         }
 
         // 3. Elmentjük magát a szabadságot
@@ -255,11 +255,13 @@ router.get('/employee-calendar', verifyToken, async (req, res) => {
 });
 
 // 7. ALKALMAZOTTI IDŐPONT LEMONDÁS (Vendég értesítésével)
+// 7. ALKALMAZOTTI IDŐPONT LEMONDÁS (Vendég értesítésével + VÁRÓLISTA AUTOMATIZÁLÁSSAL)
 router.delete('/cancel-appointment/:id', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
     const bookingId = parseInt(req.params.id);
 
     try {
+        // 1. Lekérjük a törlendő foglalás adatait
         const booking = await prisma.foglalasok.findFirst({
             where: { foglalas_id: bookingId, alkalmazott_id: empId },
             include: { vendeg: true, szolgaltatas: true, alkalmazott: true }
@@ -269,28 +271,76 @@ router.delete('/cancel-appointment/:id', verifyToken, async (req, res) => {
             return res.status(404).json({ success: false, message: "A foglalás nem található." });
         }
 
+        const guest = booking.vendeg;
+        const bookingStart = dayjs(booking.kezdo_idopont);
+        const cancelledDateStr = bookingStart.format('YYYY-MM-DD');
+        const cancelledTimeStr = bookingStart.format('HH:mm');
+
+        // 2. Töröljük a foglalást az adatbázisból
         await prisma.foglalasok.delete({
             where: { foglalas_id: bookingId }
         });
 
-        // Vendég értesítése
+        // 3. Belső értesítés a lemondott vendég profiljába
         await prisma.ertesitesek.create({
             data: {
                 felhasznalo_id: booking.vendeg_id,
                 tipus: "Időpont törölve a szolgáltató által",
-                uzenet_szovege: `A(z) ${new Date(booking.kezdo_idopont).toLocaleString('hu-HU')} időpontra lefoglalt ${booking.szolgaltatas.szolgaltatas_neve} kezelésedet a szakember lemondta.`
+                uzenet_szovege: `A(z) ${bookingStart.format('YYYY.MM.DD. HH:mm')} időpontra lefoglalt ${booking.szolgaltatas.szolgaltatas_neve} kezelésedet a szakember lemondta.`
             }
         });
 
-        console.log("\n=======================================================");
-        console.log("❌ [SZIMULÁLT E-MAIL] - SZAKEMBER ÁLTAL LEMONDOTT IDŐPONT");
-        console.log(`Címzett: ${booking.vendeg.email} (${booking.vendeg.vezeteknev} ${booking.vendeg.keresztnev})`);
-        console.log(`Kezelés: ${booking.szolgaltatas.szolgaltatas_neve}`);
-        console.log(`Időpont: ${new Date(booking.kezdo_idopont).toLocaleString('hu-HU')}`);
-        console.log("=======================================================\n");
+        // 4. Éles e-mail a lemondott vendégnek
+        if (guest && guest.email) {
+            emailService.sendCancellation(guest.email, {
+                vendegNev: `${guest.vezeteknev} ${guest.keresztnev}`,
+                szolgaltatasNev: booking.szolgaltatas.szolgaltatas_neve,
+                idopont: booking.kezdo_idopont,
+                indok: `A kezelést a szakember (${booking.alkalmazott.vezeteknev} ${booking.alkalmazott.keresztnev}) váratlan akadályoztatás miatt lemondta. Kérjük, foglalj új időpontot a weboldalon!`
+            }).catch(err => console.error("E-mail hiba alkalmazotti lemondáskor:", err));
+        }
 
-        res.json({ success: true, message: "Időpont sikeresen törölve, a vendéget értesítettük!" });
+        // 5. VÁRÓLISTA ELLENŐRZÉSE ÉS AUTOMATIKUS KIKÜLDÉSE
+        const waitlistedUsers = await prisma.varolista.findMany({
+            where: {
+                szolgaltatas_id: booking.szolgaltatas_id,
+                kivant_datum: {
+                    gte: bookingStart.startOf('day').toDate(),
+                    lte: bookingStart.endOf('day').toDate()
+                }
+            },
+            include: { vendeg: true }
+        });
+
+        // Idősáv szűrése: csak annak küldünk, akinek az idősávjába beleesik a felszabadult időpont (pl. 11:00 beleesik a 08:00-12:00-ba)
+        const eligibleUsers = waitlistedUsers.filter(w => {
+            // Kizárjuk magát a lemondott vendéget (ha véletlen ő is rajta lett volna)
+            if (w.vendeg_id === booking.vendeg_id) return false;
+
+            // Ha nincs idősáv megadva, az egész nap jó neki
+            if (!w.idosav_tol || !w.idosav_ig) return true;
+
+            // Ellenőrizzük, hogy a felszabadult kezdőidőpont (pl. 11:00) a kért sávban van-e (08:00 <= 11:00 < 12:00)
+            return cancelledTimeStr >= w.idosav_tol && cancelledTimeStr < w.idosav_ig;
+        });
+
+        // Kiküldjük az értesítő e-maileket a jogosult várólistásoknak
+        for (const item of eligibleUsers) {
+            if (item.vendeg && item.vendeg.email) {
+                emailService.sendWaitlistNotification(item.vendeg.email, {
+                    datum: booking.kezdo_idopont,
+                    szolgaltatasNev: booking.szolgaltatas.szolgaltatas_neve
+                }).catch(err => console.error("Várólista e-mail hiba:", err));
+            }
+        }
+
+        res.json({ 
+            success: true, 
+            message: `Időpont sikeresen törölve! A vendéget értesítettük, és ${eligibleUsers.length} db várólistás kapott értesítést a megüresedett helyről.` 
+        });
+
     } catch (error) {
+        console.error("Hiba az időpont törlésekor:", error);
         res.status(500).json({ success: false, message: "Hiba az időpont törlésekor." });
     }
 });

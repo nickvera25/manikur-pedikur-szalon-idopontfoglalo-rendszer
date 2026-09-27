@@ -5,7 +5,7 @@ import axios from 'axios';
 
 const Register = () => {
   const [formData, setFormData] = useState({
-    vezeteknev: '', keresztnev: '', telefon: '', email: '', jelszo: '', jelszoUjra: ''
+    vezeteknev: '', keresztnev: '', telefon: '+36', email: '', jelszo: '', jelszoUjra: ''
   });
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -17,6 +17,12 @@ const Register = () => {
     e.preventDefault();
     setError(''); 
     setSuccess('');
+
+    // TELEFONSZÁM ELLENŐRZÉSE: +36 és pontosan 9 számjegy
+    const phoneRegex = /^\+36\d{9}$/;
+    if (!phoneRegex.test(formData.telefon)) {
+      return setError('A telefonszám formátuma érvénytelen! Helyes formátum: +36301234567 (+36 és pontosan 9 számjegy szóközök nélkül).');
+    }
 
     if (formData.jelszo !== formData.jelszoUjra) {
       return setError('A két jelszó nem egyezik!');
@@ -31,7 +37,7 @@ const Register = () => {
         setError(response.data.message);
       }
     } catch (err) {
-      setError('Hiba a szerverhez való csatlakozáskor.');
+      setError(err.response?.data?.message || 'Hiba a szerverhez való csatlakozáskor.');
     }
   };
 
@@ -66,14 +72,21 @@ const Register = () => {
                   required 
                 />
               </div>
+
+              {/* TELEFONSZÁM BEVITELI MEZŐ MEGSZORÍTÁSSAL */}
               <input 
                 type="tel" 
                 name="telefon" 
                 className="form-control mb-3 w-75 p-2" 
-                placeholder="Telefonszám (pl.: +3630...)" 
+                placeholder="+36301234567" 
+                value={formData.telefon}
                 onChange={handleChange} 
+                maxLength={12}
+                pattern="^\+36\d{9}$"
+                title="A telefonszámnak +36-tal kell kezdődnie és pontosan 9 számjegyet kell tartalmaznia (pl. +36301234567)"
                 required 
               />
+
               <input 
                 type="email" 
                 name="email" 

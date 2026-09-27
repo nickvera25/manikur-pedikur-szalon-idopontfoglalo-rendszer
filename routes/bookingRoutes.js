@@ -3,18 +3,9 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const dayjs = require('dayjs');
-const nodemailer = require('nodemailer');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
-
-// Nodemailer beállítása (.env adatokkal)
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    }
-});
+const emailService = require('../services/emailService');
 
 // Token ellenőrző middleware
 const verifyToken = (req, res, next) => {
@@ -40,7 +31,7 @@ router.get('/categories', async (req, res) => {
     }
 });
 
-// 2. Szolgáltatások lekérése
+// 2. Szolgáltatások lekérése kategória szerint
 router.get('/services/:categoryId', async (req, res) => {
     const catId = parseInt(req.params.categoryId);
     try {
@@ -54,25 +45,20 @@ router.get('/services/:categoryId', async (req, res) => {
     }
 });
 
-// Nyilvános végpont: Az összes szolgáltatás lekérése a kategóriájával együtt a főoldalhoz
+// Nyilvános: Az összes szolgáltatás a kezdőlaphoz
 router.get('/all-services', async (req, res) => {
     try {
         const services = await prisma.szolgaltatasok.findMany({
-            include: {
-                kategoria: true
-            },
-            orderBy: {
-                szolgaltatas_neve: 'asc'
-            }
+            include: { kategoria: true },
+            orderBy: { szolgaltatas_neve: 'asc' }
         });
         res.json({ success: true, data: services });
     } catch (error) {
-        console.error("Hiba a szolgáltatások lekérésekor:", error);
         res.status(500).json({ success: false, message: "Nem sikerült betölteni a szolgáltatásokat." });
     }
 });
 
-// 3. Szakemberek lekérése
+// 3. Szakemberek lekérése adott szolgáltatáshoz
 router.get('/professionals/:serviceId', async (req, res) => {
     const servId = parseInt(req.params.serviceId);
     try {
@@ -94,7 +80,7 @@ router.get('/professionals/:serviceId', async (req, res) => {
     }
 });
 
-// 4. ELÉRHETŐ IDŐPONTOK KALKULÁLÁSA (Óra-alapú szabadság, munkarend és pontos státuszok)
+// 4. Elérhető idősávok kalkulációja
 router.get('/available-slots', async (req, res) => {
     const { employeeId, serviceId, date } = req.query;
     if (!employeeId || !serviceId || !date) {
@@ -106,7 +92,6 @@ router.get('/available-slots', async (req, res) => {
         const srvId = parseInt(serviceId);
         const targetDate = dayjs(date);
 
-        // 1. Munkarend ellenőrzése
         const jsDay = targetDate.day();
         const aHetNapja = jsDay === 0 ? 7 : jsDay;
 
@@ -117,7 +102,6 @@ router.get('/available-slots', async (req, res) => {
             }
         });
 
-        // Ha a munkarend szerint pihenőnap (pl. szombat/vasárnap) -> NINCS VÁRÓLISTA!
         if (!shift) {
             return res.json({ 
                 success: true, 
@@ -127,12 +111,10 @@ router.get('/available-slots', async (req, res) => {
             });
         }
 
-        // 2. Szolgáltatás adatai
         const service = await prisma.szolgaltatasok.findUnique({ where: { szolgaltatas_id: srvId } });
         if (!service) return res.status(404).json({ success: false, message: "A szolgáltatás nem található." });
         const durationMinutes = service.idotartam_perc;
 
-        // 3. Munkaidő határok
         const openStr = new Date(shift.nyitas_ido).toISOString().substring(11, 16);
         const [openHour, openMinute] = openStr.split(':').map(Number);
         const startTotalMinutes = openHour * 60 + openMinute;
@@ -144,7 +126,6 @@ router.get('/available-slots', async (req, res) => {
         const startOfDay = targetDate.startOf('day').toDate();
         const endOfDay = targetDate.endOf('day').toDate();
 
-        // 4. Lekérjük az aznapi szabadságokat
         const vacationsToday = await prisma.szabadsagok.findMany({
             where: {
                 alkalmazott_id: empId,
@@ -153,7 +134,6 @@ router.get('/available-slots', async (req, res) => {
             }
         });
 
-        // Ellenőrizzük: van-e olyan szabadság, ami a TELJES munkaidőt lefedi aznap?
         const shiftStartDateTime = targetDate.hour(openHour).minute(openMinute).second(0).millisecond(0);
         const shiftEndDateTime = targetDate.hour(closeHour).minute(closeMinute).second(0).millisecond(0);
 
@@ -170,7 +150,6 @@ router.get('/available-slots', async (req, res) => {
             });
         }
 
-        // 5. Lekérjük az aznapi foglalásokat
         const existingBookings = await prisma.foglalasok.findMany({
             where: {
                 alkalmazott_id: empId,
@@ -178,7 +157,6 @@ router.get('/available-slots', async (req, res) => {
             }
         });
 
-        // 6. Idősávok generálása
         const availableSlots = [];
         const step = 30;
 
@@ -212,7 +190,7 @@ router.get('/available-slots', async (req, res) => {
 
         res.json({ 
             success: true, 
-            data: availableSlots,
+            data: availableSlots, 
             status: availableSlots.length > 0 ? 'AVAILABLE' : 'FULLY_BOOKED',
             message: availableSlots.length === 0 ? "Erre a napra minden időpont betelt." : ""
         });
@@ -223,7 +201,7 @@ router.get('/available-slots', async (req, res) => {
     }
 });
 
-// 5. IDŐPONT LEFOGLALÁSA
+// 5. IDŐPONT LEFOGLALÁSA (Éles e-mail visszaigazolással!)
 router.post('/book', verifyToken, async (req, res) => {
     const vendegId = req.user.id || req.user.felhasznalo_id;
     const { alkalmazott_id, szolgaltatas_id, datum, ido, megjegyzes } = req.body;
@@ -283,31 +261,20 @@ router.post('/book', verifyToken, async (req, res) => {
             return ujFoglalas;
         });
 
-        // E-mail küldés vagy Terminálos szimuláció
+        // ÉLES E-MAIL KIKÜLDÉSE A VENDÉGNEK
         if (guest && guest.email) {
-            if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-                transporter.sendMail({
-                    from: `"Nails by Vera" <${process.env.EMAIL_USER}>`,
-                    to: guest.email,
-                    subject: 'Időpontfoglalás visszaigazolása',
-                    html: `<p>Kedves ${guest.keresztnev}! Sikeresen lefoglaltad: ${service.szolgaltatas_neve} (${datum} ${ido}).</p>`
-                }).catch(err => console.error("E-mail hiba:", err));
-            } else {
-                console.log("\n=======================================================");
-                console.log("✉️  [SZIMULÁLT E-MAIL] - SIKERES IDŐPONTFOGLALÁS");
-                console.log(`Címzett: ${guest.email} (${guest.vezeteknev} ${guest.keresztnev})`);
-                console.log(`Tárgy:   Időpontfoglalás visszaigazolása`);
-                console.log("-------------------------------------------------------");
-                console.log(`Szolgáltatás: ${service.szolgaltatas_neve} (${service.ar} Ft)`);
-                console.log(`Szakember:    ${employee.vezeteknev} ${employee.keresztnev}`);
-                console.log(`Időpont:      ${datum} ${ido} (${service.idotartam_perc} perc)`);
-                console.log("=======================================================\n");
-            }
+            emailService.sendBookingConfirmation(guest.email, {
+                vendegNev: `${guest.vezeteknev} ${guest.keresztnev}`,
+                szolgaltatasNev: service.szolgaltatas_neve,
+                idopont: kezdoIdopont,
+                alkalmazottNev: `${employee.vezeteknev} ${employee.keresztnev}`,
+                ar: service.ar
+            }).catch(err => console.error("E-mail küldési hiba foglaláskor:", err));
         }
 
         res.json({
             success: true,
-            message: "Időpont sikeresen lefoglalva! Visszaigazolást rögzítettünk.",
+            message: "Időpont sikeresen lefoglalva! Visszaigazoló e-mailt küldtünk.",
             data: result
         });
 
@@ -317,7 +284,7 @@ router.post('/book', verifyToken, async (req, res) => {
     }
 });
 
-// 6. A BEJELENTKEZETT VENDÉG FOGLALÁSAINAK LEKÉRÉSE (Közelgő)
+// 6. Közelgő foglalások
 router.get('/my-bookings/upcoming', verifyToken, async (req, res) => {
     const vendegId = req.user.id || req.user.felhasznalo_id;
 
@@ -339,12 +306,11 @@ router.get('/my-bookings/upcoming', verifyToken, async (req, res) => {
 
         res.json({ success: true, data: bookings });
     } catch (error) {
-        console.error("Hiba a közelgő foglalások lekérésekor:", error);
         res.status(500).json({ success: false, message: "Nem sikerült betölteni a közelgő foglalásokat." });
     }
 });
 
-// 6.B KORÁBBI FOGLALÁSOK (Előzmények)
+// 6.B Korábbi foglalások
 router.get('/my-bookings/past', verifyToken, async (req, res) => {
     const vendegId = req.user.id || req.user.felhasznalo_id;
 
@@ -366,12 +332,11 @@ router.get('/my-bookings/past', verifyToken, async (req, res) => {
 
         res.json({ success: true, data: bookings });
     } catch (error) {
-        console.error("Hiba a korábbi foglalások lekérésekor:", error);
         res.status(500).json({ success: false, message: "Nem sikerült betölteni a korábbi foglalásokat." });
     }
 });
 
-// 7. FOGLALÁS LEMONDÁSA (24h szabály + Intelligens nap- és idősáv-szűrt Várólista értesítés)
+// 7. FOGLALÁS LEMONDÁSA (24h szabály + Éles vendégértesítő + Éles várólista értesítők!)
 router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
     const vendegId = req.user.id || req.user.felhasznalo_id;
     const bookingId = parseInt(req.params.id);
@@ -391,8 +356,6 @@ router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
         }
 
         const guest = booking.vendeg;
-
-        // 1. HÁZIREND: 24 órán belüli lemondás blokkolása
         const now = dayjs();
         const bookingStart = dayjs(booking.kezdo_idopont);
         const hoursUntilBooking = bookingStart.diff(now, 'hour', true);
@@ -404,7 +367,6 @@ router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
             });
         }
 
-        // 2. FOGLALÁS TÖRLÉSE
         await prisma.foglalasok.delete({
             where: { foglalas_id: bookingId }
         });
@@ -417,27 +379,17 @@ router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
             }
         });
 
-        // Lemondás visszajelzése
+        // 1. ÉLES LEMONDÁSI E-MAIL A VENDÉGNEK
         if (guest && guest.email) {
-            if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-                transporter.sendMail({
-                    from: `"Nails by Vera" <${process.env.EMAIL_USER}>`,
-                    to: guest.email,
-                    subject: 'Időpont lemondás megerősítése',
-                    html: `<p>Kedves ${guest.keresztnev}! Az időpontodat (${bookingStart.format('YYYY-MM-DD HH:mm')}) sikeresen töröltük.</p>`
-                }).catch(err => console.error(err));
-            } else {
-                console.log("\n=======================================================");
-                console.log("🗑️  [SZIMULÁLT E-MAIL] - IDŐPONT LEMONDVA");
-                console.log(`Címzett: ${guest.email} (${guest.vezeteknev} ${guest.keresztnev})`);
-                console.log(`Törölt szolgáltatás: ${booking.szolgaltatas.szolgaltatas_neve}`);
-                console.log(`Időpont: ${bookingStart.format('YYYY. MM. DD. HH:mm')}`);
-                console.log("=======================================================\n");
-            }
+            emailService.sendCancellation(guest.email, {
+                vendegNev: `${guest.vezeteknev} ${guest.keresztnev}`,
+                szolgaltatasNev: booking.szolgaltatas.szolgaltatas_neve,
+                idopont: booking.kezdo_idopont,
+                indok: "Az időpontodat a kérésedre sikeresen töröltük a rendszerből."
+            }).catch(err => console.error("E-mail küldési hiba lemondáskor:", err));
         }
 
-        // 3. VÁRÓLISTA AUTOMATIZÁLÁSA (Csak azonos nap és idősáv egyezés esetén értesít!)
-        const cancelledDateStr = bookingStart.format('YYYY-MM-DD');
+        // 2. VÁRÓLISTA AUTOMATIZÁLT ÉRTESÍTÉSE ÉLES E-MAILBEN
         const cancelledTimeStr = bookingStart.format('HH:mm');
 
         const waitlistedUsers = await prisma.varolista.findMany({
@@ -451,43 +403,22 @@ router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
             include: { vendeg: true }
         });
 
-        // Idősáv vizsgálata (ha nincs idosav_tol megadva, az egész nap megfelel neki)
         const eligibleUsers = waitlistedUsers.filter(w => {
             if (!w.idosav_tol || !w.idosav_ig) return true;
             return cancelledTimeStr >= w.idosav_tol && cancelledTimeStr < w.idosav_ig;
         });
 
-        if (eligibleUsers.length > 0) {
-            const emails = eligibleUsers.map(w => w.vendeg.email).filter(Boolean);
-
-            if (emails.length > 0) {
-                if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
-                    transporter.sendMail({
-                        from: `"Nails by Vera" <${process.env.EMAIL_USER}>`,
-                        bcc: emails.join(','),
-                        subject: 'Felszabadult időpont a szalonban!',
-                        html: `
-                            <p>Szia!</p>
-                            <p>Felszabadult egy hely az alábbi szolgáltatásra: <strong>${booking.szolgaltatas.szolgaltatas_neve}</strong></p>
-                            <p>Időpont: <strong>${cancelledDateStr} ${cancelledTimeStr}</strong></p>
-                            <p>Szakember: <strong>${booking.alkalmazott.vezeteknev} ${booking.alkalmazott.keresztnev}</strong></p>
-                        `
-                    }).catch(err => console.error("Várólista e-mail hiba:", err));
-                } else {
-                    console.log("\n=======================================================");
-                    console.log("📢  [SZIMULÁLT E-MAIL] - CÉLZOTT VÁRÓLISTA ÉRTESÍTŐ");
-                    console.log(`Címzettek (BCC): ${emails.join(', ')}`);
-                    console.log(`Tárgy:           Felszabadult neked megfelelő időpont!`);
-                    console.log("-------------------------------------------------------");
-                    console.log(`Megüresedett:    ${booking.szolgaltatas.szolgaltatas_neve}`);
-                    console.log(`Időpont:         ${cancelledDateStr} ${cancelledTimeStr}`);
-                    console.log(`Szakember:       ${booking.alkalmazott.vezeteknev} ${booking.alkalmazott.keresztnev}`);
-                    console.log("=======================================================\n");
-                }
+        // Minden jogosult várólistás vendégnek küldünk egyedi szép értesítőt
+        for (const item of eligibleUsers) {
+            if (item.vendeg && item.vendeg.email) {
+                emailService.sendWaitlistNotification(item.vendeg.email, {
+                    datum: booking.kezdo_idopont,
+                    szolgaltatasNev: booking.szolgaltatas.szolgaltatas_neve
+                }).catch(err => console.error("Várólista e-mail hiba:", err));
             }
         }
 
-        res.json({ success: true, message: "Időpont sikeresen lemondva!" });
+        res.json({ success: true, message: "Időpont sikeresen lemondva! E-mailben visszaigazoltuk." });
 
     } catch (error) {
         console.error("Lemondási hiba:", error);
@@ -495,7 +426,7 @@ router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
     }
 });
 
-// 8. FELIRATKOZÁS VÁRÓLISTÁRA (Dátummal, idősávval és terminálos naplózással)
+// 8. Feliratkozás várólistára
 router.post('/waitlist', verifyToken, async (req, res) => {
     const vendegId = req.user.id || req.user.felhasznalo_id;
     const { szolgaltatas_id, datum, idosav_tol, idosav_ig } = req.body;
@@ -506,10 +437,8 @@ router.post('/waitlist', verifyToken, async (req, res) => {
 
     try {
         const srvId = parseInt(szolgaltatas_id);
-        // Déli 12:00 UTC idővel rögzítjük, így az időzóna elcsúszás sosem viszi át az előző napra!
         const targetDate = new Date(`${datum}T12:00:00Z`);
 
-        // Ellenőrizzük, hogy nincs-e már feliratkozva ugyanerre a napra és szolgáltatásra
         const letezo = await prisma.varolista.findFirst({
             where: {
                 vendeg_id: vendegId,
@@ -537,15 +466,6 @@ router.post('/waitlist', verifyToken, async (req, res) => {
                 idosav_ig: idosav_ig || null
             }
         });
-
-        // TERMINÁLOS NAPLÓZÁS
-        console.log("\n=======================================================");
-        console.log("📋  [ÚJ VÁRÓLISTA FELIRATKOZÁS RÖGZÍTVE]");
-        console.log(`Vendég ID:       ${vendegId}`);
-        console.log(`Szolgáltatás ID: ${srvId}`);
-        console.log(`Dátum:           ${datum}`);
-        console.log(`Kért idősáv:     ${idosav_tol || '00:00'} - ${idosav_ig || '24:00'}`);
-        console.log("=======================================================\n");
 
         res.json({ 
             success: true, 
