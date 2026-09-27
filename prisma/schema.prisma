@@ -12,32 +12,147 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// +++ A TE JELENLEGI, MŰKÖDŐ TÁBLÁD +++
 model felhasznalok {
-  felhasznalo_id  Int      @id @default(autoincrement())
-  vezeteknev      String   @db.VarChar(50)
-  keresztnev      String   @db.VarChar(50)
-  telefon         String   @db.VarChar(20)
-  email           String   @unique @db.VarChar(100)
-  jelszo          String   @db.VarChar(100) 
-  aktiv           Boolean  @default(true)
-  letrehozva      DateTime @default(now())
-
-  szerepkorok    felhasznalo_szerepkor[]
+  felhasznalo_id             Int                          @id @default(autoincrement())
+  vezeteknev                 String                       @db.VarChar(50)
+  keresztnev                 String                       @db.VarChar(50)
+  email                      String                       @unique @db.VarChar(100)
+  jelszo                     String                       @db.VarChar(100)
+  telefon                    String?                      @db.VarChar(20)
+  aktiv                      Boolean                      @default(true)
+  letrehozva                 DateTime                     @default(now())
+  jelszo_modositas_szukseges Boolean                      @default(false)
+  
+  szerepkorok                felhasznalo_szerepkor[]
+  szolgaltatasok             alkalmazott_szolgaltatasok[]
+  vendeg_foglalasok          foglalasok[]                 @relation("VendegFoglalas")
+  alkalmazott_foglalasok     foglalasok[]                 @relation("AlkalmazottFoglalas")
+  munkarend                  munkarend[]
+  szabadsagok                szabadsagok[]
+  galeria                    galeria[]
+  ertesitesek                ertesitesek[]
+  varolista                  varolista[]
 }
 
 model szerepkorok {
-  szerep_id      Int      @id @default(autoincrement())
-  nev            String   @unique @db.VarChar(50)
-
-  felhasznalok   felhasznalo_szerepkor[]
+  szerepkor_id  Int                     @id @default(autoincrement())
+  szerepkor_nev String                  @db.VarChar(50)
+  felhasznalok  felhasznalo_szerepkor[]
 }
 
 model felhasznalo_szerepkor {
   felhasznalo_id Int
-  szerep_id      Int
-
+  szerepkor_id   Int
   felhasznalo    felhasznalok @relation(fields: [felhasznalo_id], references: [felhasznalo_id])
-  szerep         szerepkorok  @relation(fields: [szerep_id], references: [szerep_id])
+  szerepkor      szerepkorok  @relation(fields: [szerepkor_id], references: [szerepkor_id])
 
-  @@id([felhasznalo_id, szerep_id])
+  @@id([felhasznalo_id, szerepkor_id])
+}
+
+// +++ AZ ÚJ TÁBLÁK A FOGLALÁSHOZ +++
+
+model kategoriak {
+  kategoria_id   Int              @id @default(autoincrement())
+  kategoria_neve String           @db.VarChar(50)
+  szolgaltatasok szolgaltatasok[]
+}
+
+model szolgaltatasok {
+  szolgaltatas_id            Int                          @id @default(autoincrement())
+  kategoria_id               Int
+  szolgaltatas_neve          String                       @db.VarChar(100)
+  leiras                     String                       @db.Text
+  ar                         Int
+  idotartam_perc             Int
+  
+  kategoria                  kategoriak                   @relation(fields: [kategoria_id], references: [kategoria_id])
+  alkalmazott_szolgaltatasok alkalmazott_szolgaltatasok[]
+  foglalasok                 foglalasok[]
+  varolista                  varolista[]
+}
+
+model alkalmazott_szolgaltatasok {
+  alkalmazott_id  Int
+  szolgaltatas_id Int
+  felhasznalo     felhasznalok   @relation(fields: [alkalmazott_id], references: [felhasznalo_id])
+  szolgaltatas    szolgaltatasok @relation(fields: [szolgaltatas_id], references: [szolgaltatas_id])
+
+  @@id([alkalmazott_id, szolgaltatas_id])
+}
+
+model foglalas_statuszok {
+  statusz_id   Int          @id @default(autoincrement())
+  statusz_neve String       @db.VarChar(50)
+  foglalasok   foglalasok[]
+}
+
+model foglalasok {
+  foglalas_id     Int                @id @default(autoincrement())
+  vendeg_id       Int
+  alkalmazott_id  Int
+  szolgaltatas_id Int
+  statusz_id      Int
+  kezdo_idopont   DateTime
+  veg_idopont     DateTime
+  megjegyzes      String?            @db.VarChar(500)
+  letrehozva      DateTime           @default(now())
+  
+  vendeg          felhasznalok       @relation("VendegFoglalas", fields: [vendeg_id], references: [felhasznalo_id])
+  alkalmazott     felhasznalok       @relation("AlkalmazottFoglalas", fields: [alkalmazott_id], references: [felhasznalo_id])
+  szolgaltatas    szolgaltatasok     @relation(fields: [szolgaltatas_id], references: [szolgaltatas_id])
+  statusz         foglalas_statuszok @relation(fields: [statusz_id], references: [statusz_id])
+}
+
+model munkarend {
+  munkarend_id   Int          @id @default(autoincrement())
+  alkalmazott_id Int
+  a_het_napja    Int
+  nyitas_ido     DateTime     @db.Time
+  zaras_ido      DateTime     @db.Time
+  
+  alkalmazott    felhasznalok @relation(fields: [alkalmazott_id], references: [felhasznalo_id])
+}
+
+model szabadsagok {
+  szabadsag_id   Int          @id @default(autoincrement())
+  alkalmazott_id Int
+  kezdo_datum    DateTime
+  veg_datum      DateTime
+  megjegyzes     String?      @db.VarChar(255)
+
+  alkalmazott    felhasznalok @relation(fields: [alkalmazott_id], references: [felhasznalo_id])
+}
+
+model varolista {
+  varolista_id       Int            @id @default(autoincrement())
+  vendeg_id          Int
+  szolgaltatas_id    Int
+  kivant_datum       DateTime       @db.Date
+  idosav_tol         String?        @db.VarChar(10) // pl. "08:00"
+  idosav_ig          String?        @db.VarChar(10) // pl. "12:00"
+  feliratkozas_ideje DateTime       @default(now())
+
+  vendeg             felhasznalok   @relation(fields: [vendeg_id], references: [felhasznalo_id])
+  szolgaltatas       szolgaltatasok @relation(fields: [szolgaltatas_id], references: [szolgaltatas_id])
+}
+
+model galeria {
+  kep_id          Int          @id @default(autoincrement())
+  alkalmazott_id  Int
+  kep_url         String       @db.VarChar(255)
+  leiras          String?      @db.VarChar(255)
+  feltoltes_ideje DateTime     @db.Date @default(now())
+  
+  alkalmazott     felhasznalok @relation(fields: [alkalmazott_id], references: [felhasznalo_id])
+}
+
+model ertesitesek {
+  ertesites_id   Int          @id @default(autoincrement())
+  felhasznalo_id Int
+  tipus          String       @db.VarChar(50)
+  uzenet_szovege String       @db.Text
+  kikuldes_ideje DateTime     @default(now())
+  
+  felhasznalo    felhasznalok @relation(fields: [felhasznalo_id], references: [felhasznalo_id])
 }
