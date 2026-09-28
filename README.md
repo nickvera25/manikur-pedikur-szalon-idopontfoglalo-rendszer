@@ -40,12 +40,12 @@ A projekt gyökérmappájában hozzon létre egy `.env` nevű fájlt, és másol
 
 ```env
 PORT=3000
-DATABASE_URL="mysql://root:@localhost:3306/manikur_pedikur_szalon"
-JWT_SECRET="szalon_nagyon_biztonsagos_titkos_kulcs_2026"
+DATABASE_URL=""
+JWT_SECRET=""
 
 # E-mail értesítésekhez (Nodemailer tesztadatok)
-SMTP_USER="teszt@pelda.hu"
-SMTP_PASS="titkosjelszo"
+SMTP_USER=""
+SMTP_PASS=""
 ```
 
 *(Megjegyzés: Ha a helyi MySQL adatbázis root felhasználója jelszóval védett, a `DATABASE_URL`-ben a `root:` után adja meg a jelszót!)*
