@@ -44,10 +44,10 @@ const Home = () => {
         <div className="row align-items-center">
           <div className="col-lg-6 mb-4 mb-lg-0 pe-lg-5">
             <h1 className="fw-bold mb-4" style={{ fontSize: '3rem' }}>
-              Szépség és ápoltság <br /> kompromisszumok nélkül
+              Szépség és ápoltság <br /> valódi odafigyeléssel
             </h1>
             <p className="lead mb-4" style={{ lineHeight: '1.8' }}>
-              Üdvözöljük a Nails by Vera szalonban! Professzionális manikűr és pedikűr szolgáltatásokkal, minőségi anyagokkal és egy csésze finom kávéval várjuk. Lassítson le egy kicsit, és bízza ránk kezei és lábai ápolását.
+              Üdvözöljük a Nails by Vera szalonban! Professzionális manikűr és pedikűr szolgáltatásokkal és minőségi anyagokkal várjuk. Lassítson le egy kicsit, és bízza ránk kezei és lábai ápolását.
             </p>
             <div className="d-flex mt-4">
               <Link to={bookingLink} className="btn btn-dark px-5 py-3 fs-5 shadow-sm">
