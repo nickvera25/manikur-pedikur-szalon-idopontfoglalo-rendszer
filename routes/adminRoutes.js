@@ -113,4 +113,77 @@ router.get('/statistics', verifyAdmin, async (req, res) => {
     }
 });
 
+// backend/routes/adminRoutes.js
+router.get('/calendar-events', verifyAdmin, async (req, res) => {
+    const { employeeId } = req.query;
+
+    try {
+        // Feltétel: ha kiválasztott egy konkrét dolgozót, csak az övét kérjük le, egyébként az összesét
+        const whereClause = {};
+        if (employeeId && employeeId !== 'all') {
+            whereClause.alkalmazott_id = parseInt(employeeId);
+        }
+
+        // 1. Foglalások lekérése
+        const bookings = await prisma.foglalasok.findMany({
+            where: whereClause,
+            include: {
+                vendeg: { select: { vezeteknev: true, keresztnev: true, telefon: true, email: true } },
+                szolgaltatas: true,
+                alkalmazott: { select: { felhasznalo_id: true, vezeteknev: true, keresztnev: true } },
+                statusz: true
+            }
+        });
+
+        // 2. Szabadságok lekérése
+        const vacations = await prisma.szabadsagok.findMany({
+            where: whereClause,
+            include: {
+                alkalmazott: { select: { felhasznalo_id: true, vezeteknev: true, keresztnev: true } }
+            }
+        });
+
+        // Események formázása a FullCalendarhoz
+        const events = [
+            ...bookings.map(b => ({
+                id: `booking-${b.foglalas_id}`,
+                title: `[${b.alkalmazott.keresztnev}] ${b.vendeg.vezeteknev} ${b.vendeg.keresztnev} - ${b.szolgaltatas.szolgaltatas_neve}`,
+                start: b.kezdo_idopont,
+                end: b.veg_idopont,
+                backgroundColor: '#4F4646',
+                borderColor: '#4F4646',
+                textColor: '#FEF9F9',
+                extendedProps: {
+                    type: 'booking',
+                    employeeName: `${b.alkalmazott.vezeteknev} ${b.alkalmazott.keresztnev}`,
+                    guestName: `${b.vendeg.vezeteknev} ${b.vendeg.keresztnev}`,
+                    guestPhone: b.vendeg.telefon || 'Nincs megadva',
+                    serviceName: b.szolgaltatas.szolgaltatas_neve,
+                    price: b.szolgaltatas.ar,
+                    status: b.statusz.statusz_neve
+                }
+            })),
+            ...vacations.map(v => ({
+                id: `vacation-${v.szabadsag_id}`,
+                title: `TÁVOLLÉT: ${v.alkalmazott.keresztnev} (${v.megjegyzes || 'Szabadság'})`,
+                start: v.kezdo_datum,
+                end: v.veg_datum,
+                backgroundColor: '#F0B4B4',
+                borderColor: '#4F4646',
+                textColor: '#4F4646',
+                extendedProps: {
+                    type: 'vacation',
+                    employeeName: `${v.alkalmazott.vezeteknev} ${v.alkalmazott.keresztnev}`,
+                    note: v.megjegyzes || 'Szabadság'
+                }
+            }))
+        ];
+
+        res.json({ success: true, data: events });
+    } catch (error) {
+        console.error("Admin naptár lekérési hiba:", error);
+        res.status(500).json({ success: false, message: "Hiba az események betöltésekor." });
+    }
+});
+
 module.exports = router;

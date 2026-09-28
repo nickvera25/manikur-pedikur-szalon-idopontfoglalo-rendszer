@@ -80,9 +80,10 @@ const Navbar = () => {
               </>
             )}
 
-            {/* 3. ADMIN MENÜ */}
+            {/* 3. ADMIN MENÜ (ÚJ: Naptár menüpont!) */}
             {isLoggedIn && userRole === 'Admin' && (
               <>
+                <li className="nav-item me-4"><Link className="nav-link" to="/admin-naptar">Naptár</Link></li>
                 <li className="nav-item me-4"><Link className="nav-link" to="/admin-szolgaltatasok">Szolgáltatások</Link></li>
                 <li className="nav-item me-4"><Link className="nav-link" to="/admin-alkalmazottak">Alkalmazottak</Link></li>
                 <li className="nav-item me-4"><Link className="nav-link" to="/admin-statisztika">Statisztika</Link></li>

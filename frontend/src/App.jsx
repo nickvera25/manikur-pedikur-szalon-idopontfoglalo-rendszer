@@ -22,6 +22,7 @@ import Hazirend from './pages/Hazirend';
 import Gallery from './pages/Gallery';
 import UploadImage from './pages/UploadImage';
 import AdminStatistics from './pages/AdminStatistics';
+import AdminCalendar from './pages/AdminCalendar';
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
         <Route path="/galeria" element={<Gallery />} />
         <Route path="/kepfeltoltes" element={<UploadImage />} />
         <Route path="/admin-statisztika" element={<AdminStatistics />} />
+        <Route path="/admin-naptar" element={<AdminCalendar />} />
       </Routes>
     </Router>
   );
