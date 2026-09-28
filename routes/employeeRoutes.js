@@ -48,13 +48,11 @@ router.post('/munkarend', verifyToken, async (req, res) => {
         return res.status(400).json({ success: false, message: "Érvénytelen beosztás adatok!" });
     }
 
-    try {
-        // 1. Töröljük a dolgozó korábbi munkarendjét
+    try {        
         await prisma.munkarend.deleteMany({
             where: { alkalmazott_id: empId }
         });
 
-        // 2. Kiszűrjük az aktív munkanapokat és formázzuk a Prisma számára
         const ujNapok = hetiBeosztas
             .filter(nap => nap.dolgozik)
             .map(nap => ({
@@ -64,7 +62,6 @@ router.post('/munkarend', verifyToken, async (req, res) => {
                 zaras_ido: new Date(`1970-01-01T${nap.ig}:00Z`)
             }));
 
-        // 3. Mentés az adatbázisba
         if (ujNapok.length > 0) {
             await prisma.munkarend.createMany({ data: ujNapok });
         }
@@ -109,7 +106,6 @@ router.post('/szabadsagok', verifyToken, async (req, res) => {
             return res.status(400).json({ success: false, message: "A befejező időpontnak későbbinek kell lennie a kezdésnél!" });
         }
 
-        // 1. Megkeressük az érintett meglévő foglalásokat
         const conflictingBookings = await prisma.foglalasok.findMany({
             where: {
                 alkalmazott_id: empId,
@@ -123,13 +119,11 @@ router.post('/szabadsagok', verifyToken, async (req, res) => {
             }
         });
 
-        // 2. Ha vannak ütköző időpontok, töröljük őket és értesítést küldünk
         for (const booking of conflictingBookings) {
             await prisma.foglalasok.delete({
                 where: { foglalas_id: booking.foglalas_id }
             });
 
-            // Belső értesítés rögzítése a vendég profiljába
             await prisma.ertesitesek.create({
                 data: {
                     felhasznalo_id: booking.vendeg_id,
@@ -138,7 +132,6 @@ router.post('/szabadsagok', verifyToken, async (req, res) => {
                 }
             });
 
-            // Éles lemondó e-mail küldése az ütköző vendégnek
             if (booking.vendeg && booking.vendeg.email) {
                 emailService.sendCancellation(booking.vendeg.email, {
                     vendegNev: `${booking.vendeg.vezeteknev} ${booking.vendeg.keresztnev}`,
@@ -148,8 +141,7 @@ router.post('/szabadsagok', verifyToken, async (req, res) => {
                 }).catch(err => console.error("E-mail küldési hiba szabadság miatti törléskor:", err));
             }
         }
-
-        // 3. Elmentjük magát a szabadságot
+t
         const ujSzabadsag = await prisma.szabadsagok.create({
             data: {
                 alkalmazott_id: empId,
@@ -255,13 +247,11 @@ router.get('/employee-calendar', verifyToken, async (req, res) => {
 });
 
 // 7. ALKALMAZOTTI IDŐPONT LEMONDÁS (Vendég értesítésével)
-// 7. ALKALMAZOTTI IDŐPONT LEMONDÁS (Vendég értesítésével + VÁRÓLISTA AUTOMATIZÁLÁSSAL)
 router.delete('/cancel-appointment/:id', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
     const bookingId = parseInt(req.params.id);
 
     try {
-        // 1. Lekérjük a törlendő foglalás adatait
         const booking = await prisma.foglalasok.findFirst({
             where: { foglalas_id: bookingId, alkalmazott_id: empId },
             include: { vendeg: true, szolgaltatas: true, alkalmazott: true }
@@ -276,12 +266,10 @@ router.delete('/cancel-appointment/:id', verifyToken, async (req, res) => {
         const cancelledDateStr = bookingStart.format('YYYY-MM-DD');
         const cancelledTimeStr = bookingStart.format('HH:mm');
 
-        // 2. Töröljük a foglalást az adatbázisból
         await prisma.foglalasok.delete({
             where: { foglalas_id: bookingId }
         });
 
-        // 3. Belső értesítés a lemondott vendég profiljába
         await prisma.ertesitesek.create({
             data: {
                 felhasznalo_id: booking.vendeg_id,
@@ -290,7 +278,6 @@ router.delete('/cancel-appointment/:id', verifyToken, async (req, res) => {
             }
         });
 
-        // 4. Éles e-mail a lemondott vendégnek
         if (guest && guest.email) {
             emailService.sendCancellation(guest.email, {
                 vendegNev: `${guest.vezeteknev} ${guest.keresztnev}`,
@@ -300,7 +287,6 @@ router.delete('/cancel-appointment/:id', verifyToken, async (req, res) => {
             }).catch(err => console.error("E-mail hiba alkalmazotti lemondáskor:", err));
         }
 
-        // 5. VÁRÓLISTA ELLENŐRZÉSE ÉS AUTOMATIKUS KIKÜLDÉSE
         const waitlistedUsers = await prisma.varolista.findMany({
             where: {
                 szolgaltatas_id: booking.szolgaltatas_id,
@@ -312,19 +298,15 @@ router.delete('/cancel-appointment/:id', verifyToken, async (req, res) => {
             include: { vendeg: true }
         });
 
-        // Idősáv szűrése: csak annak küldünk, akinek az idősávjába beleesik a felszabadult időpont (pl. 11:00 beleesik a 08:00-12:00-ba)
         const eligibleUsers = waitlistedUsers.filter(w => {
-            // Kizárjuk magát a lemondott vendéget (ha véletlen ő is rajta lett volna)
+            
             if (w.vendeg_id === booking.vendeg_id) return false;
 
-            // Ha nincs idősáv megadva, az egész nap jó neki
             if (!w.idosav_tol || !w.idosav_ig) return true;
 
-            // Ellenőrizzük, hogy a felszabadult kezdőidőpont (pl. 11:00) a kért sávban van-e (08:00 <= 11:00 < 12:00)
             return cancelledTimeStr >= w.idosav_tol && cancelledTimeStr < w.idosav_ig;
         });
 
-        // Kiküldjük az értesítő e-maileket a jogosult várólistásoknak
         for (const item of eligibleUsers) {
             if (item.vendeg && item.vendeg.email) {
                 emailService.sendWaitlistNotification(item.vendeg.email, {
@@ -382,7 +364,6 @@ router.put('/update-appointment-status/:id', verifyToken, async (req, res) => {
     const bookingId = parseInt(req.params.id);
     const { statusz_neve } = req.body;
 
-    // Csak a te 3 adatbázis-státuszodat engedjük
     const engedelyezett = ['Jóváhagyva', 'Teljesítve', 'Lemondva'];
     if (!engedelyezett.includes(statusz_neve)) {
         return res.status(400).json({ success: false, message: "Érvénytelen státusz!" });
@@ -397,7 +378,6 @@ router.put('/update-appointment-status/:id', verifyToken, async (req, res) => {
             return res.status(404).json({ success: false, message: "A foglalás nem található." });
         }
 
-        // Megkeressük az adott nevű státusz ID-jét
         const statuszRekord = await prisma.foglalas_statuszok.findFirst({
             where: { statusz_neve: statusz_neve }
         });

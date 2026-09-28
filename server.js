@@ -39,7 +39,6 @@ app.use('/api', galleryRoutes);
 const adminRoutes = require('./routes/adminRoutes');
 app.use('/api/admin', adminRoutes);
 
-// --- 24 ÓRÁS EMLÉKEZTETŐ FÜGGVÉNY ---
 async function sendDailyReminders() {
     try {
         const tomorrowStart = dayjs().add(1, 'day').startOf('day').toDate();
@@ -75,13 +74,11 @@ async function sendDailyReminders() {
     }
 }
 
-// 1. ÉLES IDŐZÍTŐ: Minden reggel 08:00-kor lefut a másnapi időpontokra
 cron.schedule('0 8 * * *', async () => {
     console.log('[CRON] Reggeli 08:00-as automatikus emlékeztető futtatása...');
     await sendDailyReminders();
 });
 
-// 2. KÉZI TESZT VÉGPONT: Azonnal lefutatja a küldést várakozás nélkül
 app.get('/api/test-reminder', async (req, res) => {
     try {
         const count = await sendDailyReminders();

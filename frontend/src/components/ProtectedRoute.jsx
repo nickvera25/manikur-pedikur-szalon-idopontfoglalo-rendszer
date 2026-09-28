@@ -6,17 +6,18 @@ const ProtectedRoute = ({ allowedRoles }) => {
   const user = JSON.parse(localStorage.getItem('user') || '{}');
   const userRole = user.szerep;
 
-  // 1. Ha nincs bejelentkezve, a bejelentkezéshez irányítjuk
+  console.log("Mit lát a ProtectedRoute?", { token, userRole, allowedRoles });
+
   if (!token) {
     return <Navigate to="/login" replace />;
   }
 
-  // 2. Ha meg van adva elvárt szerepkör, de nincs hozzá jogosultsága
+
   if (allowedRoles && !allowedRoles.includes(userRole)) {
     return <Navigate to="/" replace />;
   }
 
-  // 3. Ha minden rendben, kirajzolja a csoportba tartozó aloldalt
+
   return <Outlet />;
 };
 

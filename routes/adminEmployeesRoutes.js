@@ -68,7 +68,6 @@ router.put('/employees/:id', async (req, res) => {
     const { vezeteknev, keresztnev, email, telefonszam, szolgaltatas_id_lista } = req.body;
 
     try {
-        // Alapadatok frissítése
         await prisma.felhasznalok.update({
             where: { felhasznalo_id: parseInt(id) },
             data: { vezeteknev, keresztnev, email, telefon: telefonszam || null }
@@ -92,7 +91,7 @@ router.put('/employees/:id', async (req, res) => {
     }
 });
 
-// 4. ALKALMAZOTT TÖRLÉSE (Védett logika)
+// Alkalmazott törlése
 router.delete('/employees/:id', async (req, res) => {
     const { id } = req.params;
     const empId = parseInt(id);
@@ -110,7 +109,6 @@ router.delete('/employees/:id', async (req, res) => {
             });
         }
 
-        // 2. Kapcsolódó relációk törlése az adatbázis kényszerek miatt
         await prisma.alkalmazott_szolgaltatasok.deleteMany({ where: { alkalmazott_id: empId } });
         await prisma.felhasznalo_szerepkor.deleteMany({ where: { felhasznalo_id: empId } });
         await prisma.munkarend.deleteMany({ where: { alkalmazott_id: empId } });

@@ -18,7 +18,6 @@ const Register = () => {
     setError(''); 
     setSuccess('');
 
-    // TELEFONSZÁM ELLENŐRZÉSE: +36 és pontosan 9 számjegy
     const phoneRegex = /^\+36\d{9}$/;
     if (!phoneRegex.test(formData.telefon)) {
       return setError('A telefonszám formátuma érvénytelen! Helyes formátum: +36301234567 (+36 és pontosan 9 számjegy szóközök nélkül).');

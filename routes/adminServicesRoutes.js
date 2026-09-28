@@ -87,7 +87,6 @@ router.put('/services/:id', async (req, res) => {
 });
 
 // 4. SZOLGÁLTATÁS TÖRLÉSE
-// 4. SZOLGÁLTATÁS TÖRLÉSE (Védett logika)
 router.delete('/services/:id', async (req, res) => {
     const { id } = req.params;
     const serviceId = parseInt(id);
@@ -105,7 +104,7 @@ router.delete('/services/:id', async (req, res) => {
             });
         }
 
-        // 2. Eltávolítjuk a kapcsolótáblákból (dolgozók hozzárendelései, várólista)
+        
         await prisma.alkalmazott_szolgaltatasok.deleteMany({
             where: { szolgaltatas_id: serviceId }
         });
@@ -114,7 +113,7 @@ router.delete('/services/:id', async (req, res) => {
             where: { szolgaltatas_id: serviceId }
         });
 
-        // 3. Töröljük magát a szolgáltatást
+       
         await prisma.szolgaltatasok.delete({
             where: { szolgaltatas_id: serviceId }
         });
@@ -133,12 +132,12 @@ router.delete('/categories/:id', async (req, res) => {
     try {
         const kategoriaId = parseInt(id);
 
-        // Megszámoljuk, hány szolgáltatás tartozik ehhez a kategóriához
+        
         const serviceCount = await prisma.szolgaltatasok.count({
             where: { kategoria_id: kategoriaId }
         });
 
-        // Ha nem üres, tiltjuk a törlést
+        
         if (serviceCount > 0) {
             return res.status(400).json({ 
                 success: false, 
@@ -146,7 +145,7 @@ router.delete('/categories/:id', async (req, res) => {
             });
         }
 
-        // Ha üres, törölhetjük
+        
         await prisma.kategoriak.delete({
             where: { kategoria_id: kategoriaId }
         });

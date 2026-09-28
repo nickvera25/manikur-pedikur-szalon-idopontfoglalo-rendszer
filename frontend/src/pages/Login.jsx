@@ -17,6 +17,7 @@ const Login = () => {
 
       if (response.data.success) {
         localStorage.setItem('token', response.data.token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
         localStorage.setItem('role', response.data.user.szerep); 
         localStorage.setItem('userName', `${response.data.user.vezeteknev} ${response.data.user.keresztnev}`);
 

@@ -82,7 +82,6 @@ const AdminCalendar = () => {
         </div>
       </div>
 
-      {/* FULLCALENDAR - card-white dobozban (a gombokat és fejléceket az index.css .fc osztályai formázzák) */}
       <div className="card-white p-3 shadow-sm">
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -108,7 +107,6 @@ const AdminCalendar = () => {
         />
       </div>
 
-      {/* RÉSZLETEZŐ MODAL */}
       {selectedEvent && (
         <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-dialog-centered">

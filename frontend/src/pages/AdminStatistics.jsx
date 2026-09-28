@@ -48,7 +48,6 @@ const AdminStatistics = () => {
   return (
     <div className="container mt-5 mb-5">
       
-      {/* 1. FEJLÉC ÉS DÁTUMSZŰRŐ */}
       <div className="card-pink p-4 p-md-5 mb-4 shadow-sm">
         <div className="d-flex justify-content-between align-items-center flex-wrap gap-3">
           <div>
@@ -94,7 +93,7 @@ const AdminStatistics = () => {
         <p className="text-center fw-bold fs-5 mt-5">Forgalmi adatok összesítése...</p>
       ) : stats ? (
         <>
-          {/* 2. OPERATÍV KPI KÁRTYÁK */}
+
           <div className="row g-4 mb-5">
             <div className="col-sm-6 col-lg-3">
               <div className="card-powder p-4 shadow-sm text-center h-100 d-flex flex-column justify-content-between">
@@ -133,10 +132,10 @@ const AdminStatistics = () => {
             </div>
           </div>
 
-          {/* 3. BONTÁSOK: SZOLGÁLTATÁS & MUNKATÁRS LETERHELTSÉG */}
+
           <div className="row g-4">
             
-            {/* TOP SZOLGÁLTATÁSOK */}
+
             <div className="col-lg-6">
               <div className="card-white p-4 shadow-sm h-100">
                 <h4 className="fw-bold mb-4">Leggyakrabban kért szolgáltatások</h4>
@@ -165,7 +164,7 @@ const AdminStatistics = () => {
               </div>
             </div>
 
-            {/* MUNKATÁRSAK LETERHELTSÉGE */}
+
             <div className="col-lg-6">
               <div className="card-white p-4 shadow-sm h-100">
                 <h4 className="fw-bold mb-4">Munkatársak leterheltsége & vendégszáma</h4>

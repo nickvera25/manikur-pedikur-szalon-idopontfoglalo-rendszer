@@ -27,7 +27,7 @@ const Navbar = () => {
     <nav className="navbar navbar-expand-lg custom-navbar py-2">
       <div className="container-fluid px-5">
         
-        {/* LOGÓ */}
+        {/* logo */}
         <Link className="navbar-brand d-flex align-items-center fw-bold fs-4" to={getHomeLink()}>
           <img 
             src="/logo.png" 
@@ -45,7 +45,7 @@ const Navbar = () => {
         <div className="collapse navbar-collapse justify-content-end" id="navbarNav">
           <ul className="navbar-nav align-items-center">
             
-            {/* 1. VENDÉG MENÜ */}
+            {/* vendeg menu */}
             {(!isLoggedIn || userRole === 'Vendég') && (
               <>
                 <li className="nav-item me-4"><Link className="nav-link" to="/">Rólunk</Link></li>
@@ -71,7 +71,7 @@ const Navbar = () => {
               </>
             )}
 
-            {/* 2. ALKALMAZOTT MENÜ */}
+            {/* alkalmazott menu */}
             {isLoggedIn && userRole === 'Alkalmazott' && (
               <>
                 <li className="nav-item me-4"><Link className="nav-link" to="/naptaram">Naptáram</Link></li>
@@ -80,7 +80,7 @@ const Navbar = () => {
               </>
             )}
 
-            {/* 3. ADMIN MENÜ (ÚJ: Naptár menüpont!) */}
+            {/* admin menu */}
             {isLoggedIn && userRole === 'Admin' && (
               <>
                 <li className="nav-item me-4"><Link className="nav-link" to="/admin-naptar">Naptár</Link></li>
@@ -90,7 +90,7 @@ const Navbar = () => {
               </>
             )}
 
-            {/* KÖZÖS: PROFIL & KIJELENTKEZÉS */}
+            {/* kijelentkezes */}
             {isLoggedIn && (
               <li className="nav-item me-4"><Link className="nav-link" to="/profil">Profilom</Link></li>
             )}

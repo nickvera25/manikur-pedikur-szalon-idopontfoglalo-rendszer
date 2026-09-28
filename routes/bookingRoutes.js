@@ -201,7 +201,7 @@ router.get('/available-slots', async (req, res) => {
     }
 });
 
-// 5. IDŐPONT LEFOGLALÁSA (Éles e-mail visszaigazolással!)
+// 5. időpont foglalása
 router.post('/book', verifyToken, async (req, res) => {
     const vendegId = req.user.id || req.user.felhasznalo_id;
     const { alkalmazott_id, szolgaltatas_id, datum, ido, megjegyzes } = req.body;
@@ -261,7 +261,6 @@ router.post('/book', verifyToken, async (req, res) => {
             return ujFoglalas;
         });
 
-        // ÉLES E-MAIL KIKÜLDÉSE A VENDÉGNEK
         if (guest && guest.email) {
             emailService.sendBookingConfirmation(guest.email, {
                 vendegNev: `${guest.vezeteknev} ${guest.keresztnev}`,
@@ -336,7 +335,7 @@ router.get('/my-bookings/past', verifyToken, async (req, res) => {
     }
 });
 
-// 7. FOGLALÁS LEMONDÁSA (24h szabály + Éles vendégértesítő + Éles várólista értesítők!)
+// 7. foglalás lemondasa
 router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
     const vendegId = req.user.id || req.user.felhasznalo_id;
     const bookingId = parseInt(req.params.id);
@@ -379,7 +378,6 @@ router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
             }
         });
 
-        // 1. ÉLES LEMONDÁSI E-MAIL A VENDÉGNEK
         if (guest && guest.email) {
             emailService.sendCancellation(guest.email, {
                 vendegNev: `${guest.vezeteknev} ${guest.keresztnev}`,
@@ -389,7 +387,6 @@ router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
             }).catch(err => console.error("E-mail küldési hiba lemondáskor:", err));
         }
 
-        // 2. VÁRÓLISTA AUTOMATIZÁLT ÉRTESÍTÉSE ÉLES E-MAILBEN
         const cancelledTimeStr = bookingStart.format('HH:mm');
 
         const waitlistedUsers = await prisma.varolista.findMany({
@@ -408,7 +405,6 @@ router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
             return cancelledTimeStr >= w.idosav_tol && cancelledTimeStr < w.idosav_ig;
         });
 
-        // Minden jogosult várólistás vendégnek küldünk egyedi szép értesítőt
         for (const item of eligibleUsers) {
             if (item.vendeg && item.vendeg.email) {
                 emailService.sendWaitlistNotification(item.vendeg.email, {

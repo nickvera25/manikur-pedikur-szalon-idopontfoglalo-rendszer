@@ -54,7 +54,7 @@ const Gallery = () => {
                 style={{ cursor: 'pointer' }}
                 onClick={() => setSelectedImage(item)}
               >
-                {/* KÉP TARTÓ: levettük a card-powder-t, kapott alsó választóvonalat */}
+
                 <div 
                   style={{ 
                     height: '260px', 

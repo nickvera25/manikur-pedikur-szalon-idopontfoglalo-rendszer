@@ -31,8 +31,7 @@ const verifyAdmin = async (req, res, next) => {
     });
 };
 
-// STATISZTIKA LEKÉRÉSE (Hónap és év szűréssel)
-// STATISZTIKA LEKÉRÉSE (Pénz nélkül: Darabszámok, No-Show ráta, Leterheltség)
+// Statisztika
 router.get('/statistics', verifyAdmin, async (req, res) => {
     try {
         const year = parseInt(req.query.year) || dayjs().year();
@@ -52,13 +51,12 @@ router.get('/statistics', verifyAdmin, async (req, res) => {
             }
         });
 
-        // 1. Darabszám alapú mutatók
         const totalBookings = bookings.length;
         const completedCount = bookings.filter(b => b.statusz?.statusz_neve === 'Teljesítve').length;
         const noShowCount = bookings.filter(b => b.statusz?.statusz_neve === 'Nem jelent meg').length;
         const pendingCount = bookings.filter(b => b.statusz?.statusz_neve === 'Jóváhagyva').length;
 
-        // Megbízhatósági / Megjelenési arány (azok közül, amiknek le kellett zárulniuk)
+
         const closedCount = completedCount + noShowCount;
         const attendanceRate = closedCount > 0 ? Math.round((completedCount / closedCount) * 100) : 100;
 
@@ -76,7 +74,7 @@ router.get('/statistics', verifyAdmin, async (req, res) => {
 
         const topServices = Object.values(serviceMap).sort((a, b) => b.count - a.count);
 
-        // 3. Dolgozói leterheltség (Elvégzett vs. összes vendégszám)
+        
         const employeeMap = {};
         bookings.forEach(b => {
             const id = b.alkalmazott_id;
@@ -113,18 +111,18 @@ router.get('/statistics', verifyAdmin, async (req, res) => {
     }
 });
 
-// backend/routes/adminRoutes.js
+
 router.get('/calendar-events', verifyAdmin, async (req, res) => {
     const { employeeId } = req.query;
 
     try {
-        // Feltétel: ha kiválasztott egy konkrét dolgozót, csak az övét kérjük le, egyébként az összesét
+        
         const whereClause = {};
         if (employeeId && employeeId !== 'all') {
             whereClause.alkalmazott_id = parseInt(employeeId);
         }
 
-        // 1. Foglalások lekérése
+        
         const bookings = await prisma.foglalasok.findMany({
             where: whereClause,
             include: {
@@ -135,7 +133,7 @@ router.get('/calendar-events', verifyAdmin, async (req, res) => {
             }
         });
 
-        // 2. Szabadságok lekérése
+        
         const vacations = await prisma.szabadsagok.findMany({
             where: whereClause,
             include: {
@@ -143,7 +141,7 @@ router.get('/calendar-events', verifyAdmin, async (req, res) => {
             }
         });
 
-        // Események formázása a FullCalendarhoz
+        
         const events = [
             ...bookings.map(b => ({
                 id: `booking-${b.foglalas_id}`,
