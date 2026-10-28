@@ -60,8 +60,8 @@ const AdminEmployees = () => {
       } else {
         alert(response.data.message);
       }
-    } catch (error) {
-      alert(error.response?.data?.message || "Hiba történt a törlés során.");
+    } catch (error) { 
+      alert(error.response?.data?.message || "Hiba történt a törlés során."); 
     }
   };
 
@@ -98,26 +98,35 @@ const AdminEmployees = () => {
   };
 
   return (
-    <div className="container mt-5 mb-5 d-flex justify-content-center">
-      <div className="card-pink p-4 p-md-5 w-100 shadow-sm" style={{ maxWidth: '900px' }}>
-        <h2 className="fw-bold text-center mb-5">Alkalmazottak kezelése</h2>
+    <div className="container mt-4 mt-md-5 mb-5 d-flex justify-content-center px-2 px-sm-3">
+      <div className="card-pink p-3 p-sm-4 p-md-5 w-100 shadow-sm" style={{ maxWidth: '900px' }}>
+        <h2 className="fw-bold text-center mb-4 mb-md-5" style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2.2rem)' }}>
+          Alkalmazottak kezelése
+        </h2>
 
-        {/* Dolgozói lista */}
         <div className="employees-list mb-4">
           {employees.map((emp) => (
-            <div key={emp.felhasznalo_id} className="card-powder p-3 mb-3 d-flex justify-content-between align-items-center shadow-sm">
-              <div>
+            <div 
+              key={emp.felhasznalo_id} 
+              className="card-powder p-3 mb-3 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center shadow-sm gap-3"
+            >
+              <div className="text-break flex-grow-1 w-100">
                 <div className="fs-5 fw-bold">{emp.vezeteknev} {emp.keresztnev}</div>
-                <div className="small">{emp.email} | {emp.telefon || 'Nincs megadva telefon'}</div>
+                <div className="small text-muted">{emp.email} | {emp.telefon || 'Nincs megadva telefon'}</div>
                 <div className="small fw-bold mt-1">
                   {emp.szolgaltatasok?.length > 0 
                     ? emp.szolgaltatasok.map(asz => asz.szolgaltatas.szolgaltatas_neve).join(', ') 
                     : 'Nincs hozzárendelt szolgáltatás'}
                 </div>
               </div>
-              <div className="d-flex gap-2">
-                <button className="btn btn-outline-dark btn-sm" onClick={() => handleEdit(emp)}>Szerkesztés</button>
-                <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(emp.felhasznalo_id)}>Törlés</button>
+
+              <div className="d-flex gap-2 align-self-end align-self-sm-center flex-shrink-0">
+                <button className="btn btn-outline-dark btn-sm" onClick={() => handleEdit(emp)}>
+                  Szerkesztés
+                </button>
+                <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(emp.felhasznalo_id)}>
+                  Törlés
+                </button>
               </div>
             </div>
           ))}
@@ -125,16 +134,15 @@ const AdminEmployees = () => {
         </div>
 
         <div className="text-end">
-          <button className="btn btn-dark py-2 px-4" onClick={handleAddNew}>
+          <button className="btn btn-dark py-2 px-4 w-100 w-sm-auto" onClick={handleAddNew}>
             Új alkalmazott hozzáadása
           </button>
         </div>
       </div>
 
-      {/* MODAL */}
       {showModal && (
         <div className="modal d-block" style={{ backgroundColor: 'rgba(79, 70, 70, 0.5)' }}>
-          <div className="modal-dialog modal-dialog-centered modal-lg">
+          <div className="modal-dialog modal-dialog-centered modal-lg px-2">
             <div className="modal-content card-pink shadow-lg">
               <div className="modal-header border-0 pb-0">
                 <h5 className="modal-title fw-bold">
@@ -191,20 +199,20 @@ const AdminEmployees = () => {
                   </div>
 
                   <h6 className="fw-bold mb-3">Végezhető szolgáltatások:</h6>
-                  <div className="row g-2 mb-4">
+                  <div className="row g-2 mb-4" style={{ maxHeight: '220px', overflowY: 'auto' }}>
                     {services.map(service => {
                       const isChecked = formData.szolgaltatas_id_lista.includes(service.szolgaltatas_id);
                       return (
                         <div key={service.szolgaltatas_id} className="col-md-6">
                           <div 
-                            className={`p-2 d-flex align-items-center gap-2 ${isChecked ? 'card-powder' : 'card-white'}`}
+                            className={`p-2 d-flex align-items-center gap-2 rounded ${isChecked ? 'card-powder' : 'card-white'}`}
                             style={{ cursor: 'pointer' }}
                             onClick={() => handleCheckboxChange(service.szolgaltatas_id)}
                           >
                             <input 
                               className="form-check-input m-0" 
                               type="checkbox" 
-                              checked={isChecked}
+                              checked={isChecked} 
                               onChange={() => {}} 
                             />
                             <span className={isChecked ? 'fw-bold' : ''}>

@@ -158,7 +158,6 @@ const Profile = () => {
         
         <hr className="salon-divider my-5" />
         
-        {/* Jelszó módosítása szekció */}
         <h4 className="fw-bold text-center mb-4">Jelszó módosítása</h4>
         
         {passMessage.text && (

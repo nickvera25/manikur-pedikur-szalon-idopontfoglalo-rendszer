@@ -12,7 +12,6 @@ const AdminDashboard = () => {
         <h1 className="mb-5 fw-bold">Üdvözöljük, {userName}!</h1>
 
         <div className="row g-4">
-          {/* Szolgáltatások kártya */}
           <div className="col-md-4">
             <div className="card h-100 action-card text-center p-4">
               <div className="card-body d-flex flex-column align-items-center justify-content-center">
@@ -23,7 +22,6 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Alkalmazottak kártya */}
           <div className="col-md-4">
             <div className="card h-100 action-card text-center p-4">
               <div className="card-body d-flex flex-column align-items-center justify-content-center">
@@ -34,7 +32,6 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Statisztika kártya */}
           <div className="col-md-4">
             <div className="card h-100 action-card text-center p-4">
               <div className="card-body d-flex flex-column align-items-center justify-content-center">

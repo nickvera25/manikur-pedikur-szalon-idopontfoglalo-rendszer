@@ -47,7 +47,6 @@ const Login = () => {
       <div className="container d-flex justify-content-center align-items-center">
         <div className="row w-100 login-container shadow">
 
-          {/* Bal oldal: Űrlap */}
           <div className="col-md-6 p-4 p-md-5 d-flex flex-column justify-content-center align-items-center login-box-left">
             <h2 className="mb-4 fw-bold">Belépés</h2>
             
@@ -75,7 +74,6 @@ const Login = () => {
             <Link to="/forgot-password" className="mt-4 text-decoration-none forget-link">Elfelejtetted a jelszavad?</Link>
           </div>
 
-          {/* Jobb oldal: Logó és Regisztráció link */}
           <div className="col-md-6 p-4 p-md-5 d-flex flex-column justify-content-center align-items-center text-center">
             <img src="/logo.png" alt="Nails by Vera Logó" className="img-fluid mb-4" style={{ maxWidth: '180px' }} />
             <h1 className="fs-3 fw-bold mb-4">Üdvözöljük az oldalon!</h1>

@@ -97,22 +97,20 @@ const WorkerCalendar = () => {
   };
 
   return (
-    <div className="container-fluid py-4 d-flex justify-content-center" style={{ minHeight: '85vh' }}>
+    <div className="container-fluid py-3 py-md-4 d-flex justify-content-center px-2 px-sm-3" style={{ minHeight: '85vh' }}>
       
-      {/* Fő kártya keret */}
       <div 
-        className="card-powder w-100 p-4 p-md-5 shadow-sm d-flex flex-column"
+        className="card-powder w-100 p-3 p-sm-4 p-md-5 shadow-sm d-flex flex-column"
         style={{ maxWidth: '1200px' }}
       >
-        {/* Fejléc: Cím és Lapozó gombok */}
-        <div className="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
-          <div className="d-flex gap-2">
+        <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mb-3 mb-md-4 gap-2">
+          <div className="d-flex justify-content-center gap-2">
             <button className="btn btn-dark btn-sm px-3" onClick={handlePrev}>&lt;</button>
             <button className="btn btn-dark btn-sm px-3" onClick={handleToday}>Ma</button>
             <button className="btn btn-dark btn-sm px-3" onClick={handleNext}>&gt;</button>
           </div>
 
-          <h2 className="fw-bold m-0 text-center flex-grow-1" style={{ fontSize: '1.8rem' }}>
+          <h2 className="fw-bold m-0 text-center flex-grow-1" style={{ fontSize: 'clamp(1.25rem, 3.5vw, 1.8rem)' }}>
             {currentTitle || "Heti áttekintés"}
           </h2>
 
@@ -125,8 +123,7 @@ const WorkerCalendar = () => {
           </div>
         )}
 
-        {/* Naptár törzs */}
-        <div className="custom-worker-calendar flex-grow-1 card-white p-2">
+        <div className="custom-worker-calendar flex-grow-1 card-white p-1 p-sm-2">
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
@@ -141,6 +138,7 @@ const WorkerCalendar = () => {
             eventClick={handleEventClick}
             height="auto"
             datesSet={updateTitle}
+            dayMaxEvents={true}
             slotLabelFormat={{
               hour: 'numeric',
               minute: '2-digit',
@@ -149,28 +147,27 @@ const WorkerCalendar = () => {
           />
         </div>
 
-        {/* Alsó nézetváltó gombok */}
-        <div className="d-flex justify-content-center gap-3 mt-4 pt-2">
+        <div className="d-flex justify-content-center gap-2 gap-sm-3 mt-3 mt-md-4 pt-2 w-100">
           <button 
             type="button"
-            className={`btn px-4 py-2 ${activeView === 'timeGridDay' ? 'btn-dark' : 'btn-outline-dark'}`}
-            style={{ minWidth: '110px' }}
+            className={`btn px-2 px-sm-4 py-2 flex-fill flex-sm-grow-0 ${activeView === 'timeGridDay' ? 'btn-dark' : 'btn-outline-dark'}`}
+            style={{ maxWidth: '120px' }}
             onClick={() => handleViewChange('timeGridDay')}
           >
             Napi
           </button>
           <button 
             type="button"
-            className={`btn px-4 py-2 ${activeView === 'timeGridWeek' ? 'btn-dark' : 'btn-outline-dark'}`}
-            style={{ minWidth: '110px' }}
+            className={`btn px-2 px-sm-4 py-2 flex-fill flex-sm-grow-0 ${activeView === 'timeGridWeek' ? 'btn-dark' : 'btn-outline-dark'}`}
+            style={{ maxWidth: '120px' }}
             onClick={() => handleViewChange('timeGridWeek')}
           >
             Heti
           </button>
           <button 
             type="button"
-            className={`btn px-4 py-2 ${activeView === 'dayGridMonth' ? 'btn-dark' : 'btn-outline-dark'}`}
-            style={{ minWidth: '110px' }}
+            className={`btn px-2 px-sm-4 py-2 flex-fill flex-sm-grow-0 ${activeView === 'dayGridMonth' ? 'btn-dark' : 'btn-outline-dark'}`}
+            style={{ maxWidth: '120px' }}
             onClick={() => handleViewChange('dayGridMonth')}
           >
             Havi
@@ -178,7 +175,6 @@ const WorkerCalendar = () => {
         </div>
       </div>
 
-      {/* Részletező Modal */}
       {selectedEvent && (
         <div 
           className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center"
@@ -234,7 +230,6 @@ const WorkerCalendar = () => {
         </div>
       )}
 
-      {/* FullCalendar finomhangolások a szalon színeire */}
       <style>{`
         .custom-worker-calendar .fc-col-header-cell,
         .custom-worker-calendar .fc-timegrid-axis,
@@ -253,9 +248,61 @@ const WorkerCalendar = () => {
         }
         .custom-worker-calendar .fc-event {
           cursor: pointer;
-          border-radius: 6px;
-          padding: 2px 4px;
-          font-size: 0.85rem;
+          border-radius: 4px;
+          padding: 1px 3px;
+          font-size: 0.82rem;
+        }
+
+        @media (max-width: 768px) {
+          .custom-worker-calendar .fc-timegrid-slot {
+            height: 30px !important;
+          }
+          .custom-worker-calendar .fc-timegrid-slot-label {
+            font-size: 0.75rem !important;
+          }
+          .custom-worker-calendar .fc-col-header-cell-cushion {
+            font-size: 0.7rem !important;
+            padding: 2px 0 !important;
+          }
+          .custom-worker-calendar .fc-timegrid-axis {
+            width: 38px !important;
+          }
+
+          .custom-worker-calendar .fc-daygrid-day-frame {
+            min-height: 58px !important;
+            display: flex !important;
+            flex-direction: column !important;
+          }
+
+          .custom-worker-calendar .fc-daygrid-day-top {
+            flex-direction: row !important;
+            justify-content: center !important;
+            padding: 1px 0 !important;
+          }
+
+          .custom-worker-calendar .fc-daygrid-day-number {
+            font-size: 0.75rem !important;
+            padding: 1px 2px !important;
+          }
+
+          .custom-worker-calendar .fc-daygrid-event {
+            font-size: 0.65rem !important;
+            line-height: 1.1 !important;
+            margin: 1px 0 !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+
+          .custom-worker-calendar .fc-daygrid-block-event .fc-event-title {
+            padding: 1px 2px !important;
+            font-weight: normal !important;
+          }
+
+          .custom-worker-calendar .fc-daygrid-more-link {
+            font-size: 0.65rem !important;
+            color: var(--text-and-btn) !important;
+          }
         }
       `}</style>
     </div>

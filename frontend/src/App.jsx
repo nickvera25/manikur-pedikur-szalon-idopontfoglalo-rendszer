@@ -3,7 +3,6 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// Oldalak importálása
 import Home from "./pages/Home";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -35,7 +34,6 @@ function App() {
     <Router>
       <Navbar />
       <Routes>
-        {/* ================= 1. NYILVÁNOS OLDALAK (Bárki láthatja) ================= */}
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
@@ -45,20 +43,17 @@ function App() {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-        {/* ========== 2. MINDEN BEJELENTKEZETT FELHASZNÁLÓ (Vendég, Dolgozó, Admin) ========== */}
         <Route element={<ProtectedRoute />}>
           <Route path="/profil" element={<Profile />} />
           <Route path="/kotelezo-jelszocsere" element={<ForcedPasswordChange />} />
         </Route>
 
-        {/* ================= 3. VENDÉG FUNKCIÓK ================= */}
         <Route element={<ProtectedRoute allowedRoles={['Vendég', 'Admin']} />}>
           <Route path="/foglalas" element={<Booking />} />
           <Route path="/kozelgo-foglalasok" element={<UpcomingBookings />} />
           <Route path="/korabbi-foglalasok" element={<PastBookings />} />
         </Route>
 
-        {/* ================= 4. ALKALMAZOTTI (SZAKEMBER) FUNKCIÓK ================= */}
         <Route element={<ProtectedRoute allowedRoles={['Alkalmazott', 'Admin']} />}>
           <Route path="/worker-dashboard" element={<WorkerDashboard />} />
           <Route path="/naptaram" element={<WorkerCalendar />} />
@@ -66,7 +61,6 @@ function App() {
           <Route path="/kepfeltoltes" element={<UploadImage />} />
         </Route>
 
-        {/* ================= 5. KIZÁRÓLAG ADMINISZTRÁTORI OLDALAK ================= */}
         <Route element={<ProtectedRoute allowedRoles={['Admin']} />}>
           <Route path="/admin-dashboard" element={<AdminDashboard />} />
           <Route path="/admin-naptar" element={<AdminCalendar />} />

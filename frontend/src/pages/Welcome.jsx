@@ -59,12 +59,12 @@ const Welcome = () => {
   };
 
   return (
-    <div className="container mt-5 mb-5 d-flex justify-content-center">
+    <div className="container mt-4 mt-md-5 mb-5 d-flex justify-content-center">
       <div 
-        className="card-powder w-100 p-4 p-md-5 shadow-sm d-flex flex-column justify-content-center"
+        className="card-powder w-100 p-3 p-sm-4 p-md-5 shadow-sm d-flex flex-column justify-content-center"
         style={{ maxWidth: '1150px', minHeight: '520px' }}
       >
-        <h1 className="fw-bold mb-5" style={{ fontSize: '2.8rem' }}>
+        <h1 className="fw-bold mb-4 mb-md-5" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
           Üdvözöljük {userName}!
         </h1>
 
@@ -76,14 +76,13 @@ const Welcome = () => {
 
         <div className="row g-4">
           
-          {/* Bal oldal: Közelgő időpont */}
           <div className="col-lg-6">
             <div 
-              className="card-pink p-4 p-xl-5 d-flex align-items-center gap-4 h-100 shadow-sm"
+              className="card-pink p-4 p-xl-5 d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3 gap-sm-4 h-100 shadow-sm"
               style={{ minHeight: '230px' }}
             >
               <div style={{ flexShrink: 0 }}>
-                <svg width="75" height="75" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="65" height="65" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                   <line x1="16" y1="2" x2="16" y2="6"></line>
                   <line x1="8" y1="2" x2="8" y2="6"></line>
@@ -91,10 +90,11 @@ const Welcome = () => {
                 </svg>
               </div>
 
-              <div className="d-flex flex-column justify-content-center flex-grow-1">
-                <h3 className="fw-bold m-0 mb-3" style={{ fontSize: '1.45rem' }}>
-                  Közelgő időpontod:&nbsp;&nbsp;
-                  <span className="fw-normal">
+              <div className="d-flex flex-column justify-content-center flex-grow-1 w-100">
+                <h3 className="fw-bold m-0 mb-3" style={{ fontSize: '1.35rem' }}>
+                  Közelgő időpontod:
+                  {/* d-block révén új sorba kerül, így soha nem nyomja ki a kártyát */}
+                  <span className="fw-normal d-block mt-1 text-muted" style={{ fontSize: '1.15rem' }}>
                     {loading ? "Betöltés..." : nextBooking ? dayjs(nextBooking.kezdo_idopont).format('YYYY.MM.DD. HH:mm') : "Nincs"}
                   </span>
                 </h3>
@@ -116,26 +116,25 @@ const Welcome = () => {
             </div>
           </div>
 
-          {/* Jobb oldal: Foglalás kártya */}
           <div className="col-lg-6">
             <div 
-              className="card-pink p-4 p-xl-5 d-flex align-items-center gap-4 h-100 shadow-sm"
+              className="card-pink p-4 p-xl-5 d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-3 gap-sm-4 h-100 shadow-sm"
               style={{ minHeight: '230px' }}
             >
               <div style={{ flexShrink: 0 }}>
-                <svg width="75" height="75" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="65" height="65" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <line x1="12" y1="5" x2="12" y2="19"></line>
                   <line x1="5" y1="12" x2="19" y2="12"></line>
                 </svg>
               </div>
 
-              <div className="d-flex flex-column justify-content-center flex-grow-1">
-                <h3 className="fw-bold m-0 mb-3" style={{ fontSize: '1.55rem' }}>
+              <div className="d-flex flex-column justify-content-center flex-grow-1 w-100">
+                <h3 className="fw-bold m-0 mb-3" style={{ fontSize: '1.35rem' }}>
                   Szeretnél foglalni?
                 </h3>
 
                 <div>
-                  <Link to="/foglalas" className="btn btn-dark px-4 py-2 text-decoration-none">
+                  <Link to="/foglalas" className="btn btn-dark px-4 py-2 text-decoration-none d-inline-block">
                     Foglalás
                   </Link>
                 </div>

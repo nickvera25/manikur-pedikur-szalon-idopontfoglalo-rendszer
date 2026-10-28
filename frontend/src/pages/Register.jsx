@@ -45,7 +45,6 @@ const Register = () => {
       <div className="container d-flex justify-content-center align-items-center">
         <div className="row w-100 login-container shadow">
 
-          {/* Bal oldal: Űrlap */}
           <div className="col-md-6 p-4 p-md-5 d-flex flex-column justify-content-center align-items-center login-box-left">
             <h2 className="mb-4 fw-bold">Regisztráció</h2>
             
@@ -72,7 +71,6 @@ const Register = () => {
                 />
               </div>
 
-              {/* TELEFONSZÁM BEVITELI MEZŐ MEGSZORÍTÁSSAL */}
               <input 
                 type="tel" 
                 name="telefon" 

@@ -181,17 +181,18 @@ const Booking = () => {
   };
 
   return (
-    <div className="container mt-5 mb-5 d-flex justify-content-center">
-      <div className="card-pink p-4 p-md-5 w-100 shadow-sm" style={{ maxWidth: '1100px' }}>
-        <h2 className="fw-bold text-center mb-4">Új időpont foglalása</h2>
+    <div className="container mt-3 mt-md-5 mb-5 d-flex justify-content-center px-2 px-sm-3">
+      <div className="card-pink p-3 p-sm-4 p-md-5 w-100 shadow-sm" style={{ maxWidth: '1100px' }}>
+        <h2 className="fw-bold text-center mb-3 mb-md-4" style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2.2rem)' }}>
+          Új időpont foglalása
+        </h2>
 
         {errorMessage && <div className="alert alert-salon text-center mb-4 py-2">{errorMessage}</div>}
         {successMessage && <div className="alert alert-salon text-center mb-4 py-2 fw-bold">{successMessage}</div>}
 
-        {/* 1. Kategória, Szolgáltatás, Szakember választó */}
-        <div className="card-powder p-4 mb-4 shadow-sm">
+        <div className="card-powder p-3 p-md-4 mb-4 shadow-sm">
           <div className="row mb-3 align-items-center">
-            <div className="col-md-4 text-md-end fw-bold">Kategória:</div>
+            <div className="col-md-4 text-md-end fw-bold mb-1 mb-md-0">Kategória:</div>
             <div className="col-md-8">
               <select 
                 className="form-select form-control" 
@@ -214,7 +215,7 @@ const Booking = () => {
           </div>
 
           <div className="row mb-3 align-items-center">
-            <div className="col-md-4 text-md-end fw-bold">Szolgáltatás:</div>
+            <div className="col-md-4 text-md-end fw-bold mb-1 mb-md-0">Szolgáltatás:</div>
             <div className="col-md-8">
               <select 
                 className="form-select form-control" 
@@ -239,7 +240,7 @@ const Booking = () => {
           </div>
 
           <div className="row align-items-center">
-            <div className="col-md-4 text-md-end fw-bold">Szakember:</div>
+            <div className="col-md-4 text-md-end fw-bold mb-1 mb-md-0">Szakember:</div>
             <div className="col-md-8">
               <select 
                 className="form-select form-control" 
@@ -259,16 +260,16 @@ const Booking = () => {
           </div>
         </div>
 
-        {/* 2. Naptár és Elérhető idősávok */}
-        <div className="row g-4">
+        <div className="row g-3 g-md-4">
           <div className="col-lg-7">
-            <div className="card-white p-4 h-100 shadow-sm">
+            <div className="card-white p-2 p-sm-3 p-md-4 h-100 shadow-sm">
               <FullCalendar
                 plugins={[dayGridPlugin, interactionPlugin]}
                 initialView="dayGridMonth"
                 locale={huLocale}
                 dateClick={handleDateClick}
                 height="auto"
+                aspectRatio={1.2}
                 validRange={{ start: dayjs().format('YYYY-MM-DD') }}
                 headerToolbar={{ left: 'prev', center: 'title', right: 'next' }}
               />
@@ -276,22 +277,21 @@ const Booking = () => {
           </div>
 
           <div className="col-lg-5">
-            <div className="card-white p-4 h-100 d-flex flex-column shadow-sm">
+            <div className="card-white p-3 p-md-4 h-100 d-flex flex-column shadow-sm">
               <h5 className="fw-bold mb-3">
                 {selectedDate ? `${selectedDate} időpontjai:` : 'Elérhető időpontok:'}
               </h5>
 
-              {loadingSlots && <p>Időpontok kalkulációja...</p>}
+              {loadingSlots && <p className="text-muted">Időpontok kalkulációja...</p>}
 
-              {/* Időpont gombok */}
               {!loadingSlots && selectedDate && availableTimes.length > 0 && (
                 <div className="d-flex flex-wrap gap-2 mb-3" style={{ maxHeight: '180px', overflowY: 'auto' }}>
                   {availableTimes.map((time) => (
                     <button 
-                      key={time}
-                      type="button"
-                      className={`btn btn-sm ${selectedTime === time ? 'btn-dark' : 'btn-outline-dark'}`}
-                      style={{ width: '85px' }}
+                      key={time} 
+                      type="button" 
+                      className={`btn btn-sm ${selectedTime === time ? 'btn-dark' : 'btn-outline-dark'}`} 
+                      style={{ width: '85px' }} 
                       onClick={() => setSelectedTime(time)}
                     >
                       {time}
@@ -300,7 +300,6 @@ const Booking = () => {
                 </div>
               )}
 
-              {/* Pihenőnap / Szabadság */}
               {!loadingSlots && selectedDate && (dayStatus === 'NOT_WORKING' || dayStatus === 'ON_VACATION') && (
                 <div className="card-powder p-3 rounded text-center my-3">
                   <p className="mb-0 fw-bold">
@@ -309,7 +308,6 @@ const Booking = () => {
                 </div>
               )}
 
-              {/* Lenyitható várólista gomb */}
               {!loadingSlots && selectedDate && dayStatus === 'AVAILABLE' && availableTimes.length > 0 && !showWaitlistForm && (
                 <div className="text-center mt-2 mb-3">
                   <button 
@@ -322,7 +320,6 @@ const Booking = () => {
                 </div>
               )}
 
-              {/* Várólista űrlap */}
               {!loadingSlots && selectedDate && (dayStatus === 'FULLY_BOOKED' || showWaitlistForm) && (
                 <div className="card-powder p-3 my-3" style={{ border: '1px dashed var(--text-and-btn)' }}>
                   <div className="d-flex justify-content-between align-items-center mb-1">
@@ -338,7 +335,7 @@ const Booking = () => {
 
                   <select 
                     className="form-select form-control form-select-sm mb-2" 
-                    value={waitlistPref}
+                    value={waitlistPref} 
                     onChange={(e) => setWaitlistPref(e.target.value)}
                   >
                     <option value="ALL_DAY">Egész nap (bármikor jó)</option>
@@ -357,7 +354,7 @@ const Booking = () => {
 
                   <button 
                     type="button" 
-                    className="btn btn-dark btn-sm w-100 mt-1"
+                    className="btn btn-dark btn-sm w-100 mt-1" 
                     onClick={handleWaitlistSubmit}
                   >
                     Feliratkozás a várólistára
@@ -375,23 +372,22 @@ const Booking = () => {
                 <p className="opacity-75">Válassz ki egy napot a naptárban a szabad idősávok megtekintéséhez!</p>
               )}
 
-              {/* Megjegyzés mező */}
               <div className="mt-3 mb-3">
                 <label className="form-label small fw-bold">Megjegyzés (opcionális):</label>
                 <textarea 
                   className="form-control card-powder" 
-                  rows="2"
-                  value={note}
-                  onChange={(e) => setNote(e.target.value)}
-                  placeholder="Különleges kérés, minta..."
+                  rows="2" 
+                  value={note} 
+                  onChange={(e) => setNote(e.target.value)} 
+                  placeholder="Különleges kérés, minta..." 
                 />
               </div>
 
               <div className="mt-auto text-end pt-2">
                 <button 
                   className="btn btn-dark py-2 px-4 w-100" 
-                  disabled={!selectedDate || !selectedTime}
-                  onClick={handleBooking}
+                  disabled={!selectedDate || !selectedTime} 
+                  onClick={handleBooking} 
                   style={{ opacity: (!selectedDate || !selectedTime) ? 0.6 : 1 }}
                 >
                   Időpont lefoglalása

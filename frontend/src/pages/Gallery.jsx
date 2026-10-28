@@ -28,7 +28,6 @@ const Gallery = () => {
   return (
     <div className="container mt-5 mb-5">
       
-      {/* FEJLÉC DOBOZ */}
       <div className="card-pink p-4 p-md-5 mb-5 shadow-sm text-center">
         <h1 className="fw-bold mb-3" style={{ fontSize: '2.8rem' }}>
           Munkáink & Galéria
@@ -92,7 +91,6 @@ const Gallery = () => {
         </div>
       )}
 
-      {/* NAGYÍTÓ MODAL */}
       {selectedImage && (
         <div 
           className="position-fixed top-0 start-0 w-100 h-100 d-flex justify-content-center align-items-center p-3"

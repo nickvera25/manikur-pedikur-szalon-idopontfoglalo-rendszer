@@ -9,7 +9,6 @@ const Hazirend = () => {
   return (
     <div className="container mt-5 mb-5 d-flex justify-content-center">
       
-      {/* FŐ BEFOGLALÓ KÁRTYA */}
       <div className="card-pink p-4 p-md-5 w-100 shadow-sm" style={{ maxWidth: '1000px' }}>
         
         <div className="text-center mb-5">
@@ -21,7 +20,6 @@ const Hazirend = () => {
           </p>
         </div>
 
-        {/* 1. BLOKK: FIZETÉS */}
         <div className="card-white p-4 mb-4 shadow-sm">
           <div className="d-flex align-items-center gap-3 mb-3">
             <i className="fa-solid fa-handshake-simple fa-2x"></i>
@@ -35,7 +33,6 @@ const Hazirend = () => {
           </p>
         </div>
 
-        {/* 2. BLOKK: LEMONDÁSI SZABÁLYZAT */}
         <div className="card-white p-4 mb-4 shadow-sm">
           <div className="d-flex align-items-center gap-3 mb-3">
             <i className="fa-regular fa-clock fa-2x"></i>
@@ -56,7 +53,6 @@ const Hazirend = () => {
           </ul>
         </div>
 
-        {/* 3. BLOKK: ÉRKEZÉS, KÉSÉS */}
         <div className="card-white p-4 mb-4 shadow-sm">
           <div className="d-flex align-items-center gap-3 mb-3">
             <i className="fa-solid fa-person-walking-arrow-right fa-2x"></i>
@@ -77,7 +73,6 @@ const Hazirend = () => {
           </ul>
         </div>
 
-        {/* 4. BLOKK: ETIKETT ÉS GARANCIA */}
         <div className="card-white p-4 mb-4 shadow-sm">
           <div className="d-flex align-items-center gap-3 mb-3">
             <i className="fa-solid fa-shield-heart fa-2x"></i>
@@ -98,14 +93,12 @@ const Hazirend = () => {
           </ul>
         </div>
 
-        {/* AUTOMATIKUS ELFOGADÁS DOBOZ */}
         <div className="card-powder p-3 rounded text-center mb-4" style={{ borderStyle: 'dashed' }}>
           <p className="m-0 fw-bold small">
             📌 Az online időpontfoglalás elküldésével a szalon Házirendje automatikusan elfogadottnak minősül.
           </p>
         </div>
 
-        {/* GOMB A FOGLALÁSHOZ */}
         <div className="text-center pt-2">
           <Link to={bookingLink} className="btn btn-dark px-5 py-3 fs-5 shadow-sm">
             MEGÉRTETTEM, IDŐPONTOT FOGLALOK

@@ -7,7 +7,7 @@ import './index.css';
 import dayjs from 'dayjs';
 import 'dayjs/locale/hu';
 
-dayjs.locale('hu'); // Globálisan magyar nyelvre állítja a teljes alkalmazást
+dayjs.locale('hu');
 
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>

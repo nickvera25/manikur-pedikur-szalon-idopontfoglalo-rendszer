@@ -16,7 +16,6 @@ body {
     margin: 0; 
 }
 
-/* --- KORÁBBI LOGIN & ALAP ELEMEK --- */
 .login-body {
     background-color: var(--login-bg);
 }
@@ -55,7 +54,6 @@ body {
     }
 }
 
-/* --- NAVBAR --- */
 .custom-navbar {
     background-color: var(--login-bg);
     border-bottom: 1px solid var(--text-and-btn);
@@ -73,7 +71,6 @@ body {
     text-decoration: none !important;
 }
 
-/* --- KÁRTYÁK ÉS DOBOZOK --- */
 .content-card-wrapper {
     background-color: var(--login-bg);
     border: var(--salon-border);
@@ -122,7 +119,6 @@ body {
     border: 1px solid var(--text-and-btn);
 }
 
-/* --- GOMBOK --- */
 .btn-dark {
     background-color: var(--text-and-btn) !important;
     border-color: var(--text-and-btn) !important;
@@ -148,7 +144,6 @@ body {
     color: var(--card-bg) !important;
 }
 
-/* --- FORM ELEMEK & VÁLASZTÓK --- */
 .form-select-salon {
     background-color: var(--page-bg);
     color: var(--text-and-btn);
@@ -157,7 +152,6 @@ body {
     font-weight: 600;
 }
 
-/* --- JELVÉNYEK, FIGYELMEZTETÉSEK, ELVÁLASZTÓK --- */
 .badge-salon {
     background-color: var(--login-bg);
     color: var(--text-and-btn);
@@ -181,7 +175,6 @@ body {
     color: var(--text-and-btn) !important;
 }
 
-/* --- DROPDOWN MENÜ --- */
 .custom-dropdown-menu {
     background-color: var(--page-bg);
     border: 1px solid var(--text-and-btn) !important;
@@ -209,7 +202,6 @@ body {
     display: none !important;
 }
 
-/* --- FULLCALENDAR NAPTÁR --- */
 .fc {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
@@ -264,3 +256,42 @@ body {
     border-radius: var(--salon-radius);
 }
 
+@media (max-width: 768px) {
+  .fc .fc-toolbar {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 0.75rem !important;
+    gap: 0.25rem;
+  }
+
+  .fc .fc-toolbar-title {
+    font-size: 1.15rem !important;
+    white-space: nowrap;
+    margin: 0 !important;
+  }
+
+  .fc .fc-button {
+    padding: 0.25rem 0.55rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .fc .fc-daygrid-day-frame {
+    min-height: 44px !important;
+    height: 44px !important;
+  }
+
+  .fc .fc-col-header-cell-cushion {
+    font-size: 0.75rem !important;
+    padding: 2px 0 !important;
+  }
+
+  .fc .fc-daygrid-day-top {
+    justify-content: center !important;
+    padding-top: 4px;
+  }
+
+  .fc .fc-daygrid-day-number {
+    font-size: 0.85rem !important;
+  }
+}

@@ -61,8 +61,8 @@ const AdminServices = () => {
       } else {
         alert(response.data.message);
       }
-    } catch (error) {
-      alert(error.response?.data?.message || "Hiba történt a törlés során.");
+    } catch (error) { 
+      alert(error.response?.data?.message || "Hiba történt a törlés során."); 
     }
   };
 
@@ -83,8 +83,8 @@ const AdminServices = () => {
         setCategorySuccess("Kategória sikeresen létrehozva!");
         await fetchData();
       }
-    } catch (error) {
-      setCategoryError("Nem sikerült létrehozni a kategóriát.");
+    } catch (error) { 
+      setCategoryError("Nem sikerült létrehozni a kategóriát."); 
     }
   };
 
@@ -101,8 +101,8 @@ const AdminServices = () => {
       } else {
         setCategoryError(response.data.message); 
       }
-    } catch (error) {
-      setCategoryError(error.response?.data?.message || "Hiba történt a törlés során.");
+    } catch (error) { 
+      setCategoryError(error.response?.data?.message || "Hiba történt a törlés során."); 
     }
   };
 
@@ -120,40 +120,60 @@ const AdminServices = () => {
   };
 
   return (
-    <div className="container mt-5 mb-5 d-flex justify-content-center">
-      <div className="card-pink p-4 p-md-5 w-100 shadow-sm" style={{ maxWidth: '900px' }}>
-        <h2 className="fw-bold text-center mb-5">Szolgáltatások kezelése</h2>
+    <div className="container mt-4 mt-md-5 mb-5 d-flex justify-content-center px-2 px-sm-3">
+      <div className="card-pink p-3 p-sm-4 p-md-5 w-100 shadow-sm" style={{ maxWidth: '900px' }}>
+        <h2 className="fw-bold text-center mb-4 mb-md-5" style={{ fontSize: 'clamp(1.5rem, 3.5vw, 2.2rem)' }}>
+          Szolgáltatások kezelése
+        </h2>
 
-        {/* Szolgáltatások listája */}
         <div className="services-list mb-4">
           {services.map((service) => (
-            <div key={service.szolgaltatas_id} className="card-powder p-3 mb-3 d-flex justify-content-between align-items-center shadow-sm">
-              <div className="fs-5 fw-bold">
-                {service.szolgaltatas_neve} - {service.ar.toLocaleString('hu-HU')} Ft <span className="fs-6 fw-normal">({service.idotartam_perc} perc)</span>
+            <div 
+              key={service.szolgaltatas_id} 
+              className="card-powder p-3 mb-3 d-flex flex-column flex-sm-row justify-content-between align-items-start align-items-sm-center shadow-sm gap-3"
+            >
+              <div className="text-break flex-grow-1 w-100">
+                <div className="fs-5 fw-bold text-break mb-1">
+                  {service.szolgaltatas_neve}
+                </div>
+                <div className="text-muted fw-semibold">
+                  {service.ar.toLocaleString('hu-HU')} Ft 
+                  <span className="fw-normal ms-2 small">({service.idotartam_perc} perc)</span>
+                </div>
               </div>
-              <div className="d-flex gap-2">
-                <button className="btn btn-outline-dark btn-sm" onClick={() => handleEdit(service)}>Szerkesztés</button>
-                <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(service.szolgaltatas_id)}>Törlés</button>
+
+              <div className="d-flex gap-2 align-self-end align-self-sm-center flex-shrink-0">
+                <button className="btn btn-outline-dark btn-sm" onClick={() => handleEdit(service)}>
+                  Szerkesztés
+                </button>
+                <button className="btn btn-outline-danger btn-sm" onClick={() => handleDelete(service.szolgaltatas_id)}>
+                  Törlés
+                </button>
               </div>
             </div>
           ))}
           {services.length === 0 && <p className="text-center">Nincsenek még szolgáltatások feltöltve.</p>}
         </div>
 
-        <div className="d-flex justify-content-between align-items-center mt-4 flex-wrap gap-2">
-          <button className="btn btn-outline-dark py-2 px-4" onClick={() => { setCategoryError(''); setCategorySuccess(''); setShowCategoryModal(true); }}>
+        <div className="d-flex flex-column flex-sm-row justify-content-between align-items-stretch align-items-sm-center mt-4 gap-2">
+          <button 
+            className="btn btn-outline-dark py-2 px-4 w-100 w-sm-auto" 
+            onClick={() => { setCategoryError(''); setCategorySuccess(''); setShowCategoryModal(true); }}
+          >
             Kategóriák kezelése
           </button>
-          <button className="btn btn-dark py-2 px-4" onClick={handleAddNew}>
+          <button 
+            className="btn btn-dark py-2 px-4 w-100 w-sm-auto" 
+            onClick={handleAddNew}
+          >
             Új szolgáltatás hozzáadása
           </button>
         </div>
       </div>
 
-      {/* Szolgáltatás Modal */}
       {showModal && (
         <div className="modal d-block" style={{ backgroundColor: 'rgba(79, 70, 70, 0.5)' }}>
-          <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-dialog modal-dialog-centered px-2">
             <div className="modal-content card-pink shadow-lg">
               <div className="modal-header border-0 pb-0">
                 <h5 className="modal-title fw-bold">{isEditing ? 'Szolgáltatás módosítása' : 'Új szolgáltatás'}</h5>
@@ -204,10 +224,9 @@ const AdminServices = () => {
         </div>
       )}
 
-      {/* Kategóriák kezelése Modal */}
       {showCategoryModal && (
         <div className="modal d-block" style={{ backgroundColor: 'rgba(79, 70, 70, 0.5)' }}>
-          <div className="modal-dialog modal-dialog-centered">
+          <div className="modal-dialog modal-dialog-centered px-2">
             <div className="modal-content card-pink shadow-lg">
               <div className="modal-header border-0 pb-0">
                 <h5 className="modal-title fw-bold">Kategóriák kezelése</h5>
@@ -237,10 +256,10 @@ const AdminServices = () => {
                 <label className="form-label fw-bold mb-2">Létező kategóriák:</label>
                 <div className="list-group mb-4" style={{ maxHeight: '200px', overflowY: 'auto' }}>
                   {categories.map(cat => (
-                    <div key={cat.kategoria_id} className="card-powder p-2 mb-2 d-flex justify-content-between align-items-center shadow-sm">
-                      <span className="fw-semibold">{cat.kategoria_neve}</span>
+                    <div key={cat.kategoria_id} className="card-powder p-2 mb-2 d-flex justify-content-between align-items-center shadow-sm gap-2">
+                      <span className="fw-semibold text-break">{cat.kategoria_neve}</span>
                       <button 
-                        className="btn btn-sm btn-outline-danger" 
+                        className="btn btn-sm btn-outline-danger flex-shrink-0" 
                         onClick={() => handleDeleteCategory(cat.kategoria_id)}
                       >
                         Törlés

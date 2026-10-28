@@ -104,7 +104,6 @@ const UploadImage = () => {
           </div>
         )}
 
-        {/* Feltöltő űrlap */}
         <form onSubmit={handleUpload} className="card-white p-4 shadow-sm mb-5">
           <div className="mb-3">
             <label className="form-label fw-bold">Válassz képet:</label>
@@ -149,7 +148,6 @@ const UploadImage = () => {
           </button>
         </form>
 
-        {/* Képek listája */}
         <h4 className="fw-bold mb-3">Galéria képek kezelése</h4>
         <div className="row g-3">
           {myImages.map((img) => (

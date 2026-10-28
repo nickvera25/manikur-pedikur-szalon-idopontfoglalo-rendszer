@@ -132,7 +132,6 @@ const ScheduleSetting = () => {
           </div>
         )}
 
-        {/* 1. RÉSZ: HETI MUNKAREND */}
         <h2 className="fw-bold text-center mb-2">Állandó heti munkarend</h2>
         <p className="text-center mb-4 small">
           Állítsd be az általános heti munkaidődet, amely alapján a naptár automatikusan kalkulál.
@@ -192,7 +191,6 @@ const ScheduleSetting = () => {
 
         <hr className="salon-divider my-5" />
 
-        {/* 2. RÉSZ: SZABADSÁGOK ÉS TÁVOLLÉTEK */}
         <h3 className="fw-bold text-center mb-2">Szabadságok és egyedi távollétek</h3>
         <p className="text-center mb-4 small">
           Itt rögzíthetsz többnapos szabadságot vagy pár órás távollétet (pl. orvos). A rendszer az érintett idősávokat zárolja a vendégek elől.
@@ -238,7 +236,6 @@ const ScheduleSetting = () => {
           </div>
         </form>
 
-        {/* Rögzített távollétek listája */}
         <h5 className="fw-bold mb-3">Rögzített távolléteid:</h5>
         {szabadsagok.length === 0 ? (
           <p>Nincs rögzített jövőbeli távolléted.</p>

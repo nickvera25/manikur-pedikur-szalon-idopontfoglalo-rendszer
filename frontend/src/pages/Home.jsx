@@ -39,7 +39,6 @@ const Home = () => {
   return (
     <div className="container mt-5 mb-5">
       
-      {/* 1. SZEKCIÓ: HERO / BEMUTATKOZÁS */}
       <div className="card-pink p-4 p-md-5 mb-5 shadow-sm">
         <div className="row align-items-center">
           <div className="col-lg-6 mb-4 mb-lg-0 pe-lg-5">
@@ -71,7 +70,6 @@ const Home = () => {
         </div>
       </div>
 
-      {/* 2. SZEKCIÓ: MIÉRT VÁLASSZA SZALONUNKAT? */}
       <div className="card-pink p-4 p-md-5 mb-5 shadow-sm">
         <h2 className="fw-bold mb-5 text-center">Miért válassza szalonunkat?</h2>
         
@@ -108,14 +106,12 @@ const Home = () => {
         </div>
       </div>
 
-      {/* 3. SZEKCIÓ: SZOLGÁLTATÁSOK & ÁRLISTA */}
       <div className="card-pink p-4 p-md-5 shadow-sm">
         <h2 className="fw-bold mb-3 text-center">Szolgáltatásaink & Áraink</h2>
         <p className="text-center mb-4 mx-auto" style={{ maxWidth: '650px' }}>
           Válogass folyamatosan frissülő kínálatunkból! Az árak tartalmazzák az előkészítést és a felhasznált prémium anyagokat.
         </p>
 
-        {/* Kategória szűrők */}
         <div className="d-flex justify-content-center flex-wrap gap-2 mb-5">
           <button 
             type="button"
@@ -136,7 +132,6 @@ const Home = () => {
           ))}
         </div>
 
-        {/* Szolgáltatás kártyák */}
         {loading ? (
           <p className="text-center fw-bold">Szolgáltatások betöltése...</p>
         ) : filteredServices.length === 0 ? (
