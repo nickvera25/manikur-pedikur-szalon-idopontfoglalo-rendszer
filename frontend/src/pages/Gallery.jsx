@@ -26,70 +26,78 @@ const Gallery = () => {
   }, []);
 
   return (
-    <div className="container mt-5 mb-5">
+    <div className="container mt-4 mt-md-5 mb-5 d-flex justify-content-center px-2 px-sm-3">
       
-      <div className="card-pink p-4 p-md-5 mb-5 shadow-sm text-center">
-        <h1 className="fw-bold mb-3" style={{ fontSize: '2.8rem' }}>
-          Munkáink & Galéria
-        </h1>
-        <p className="lead mx-auto mb-0 text-center" style={{ maxWidth: '700px' }}>
-          Tekintsd meg szakembereink legfrissebb körmös munkáit! Meríts ihletet a következő szettedhez az elkészült manikűrökből és pedikűrökből.
-        </p>
-      </div>
-
-      {/* KÉPRÁCS */}
-      {loading ? (
-        <p className="text-center fw-bold fs-5">Képek betöltése...</p>
-      ) : images.length === 0 ? (
-        <div className="card-powder p-5 text-center shadow-sm">
-          <h4 className="fw-bold m-0">Még nincsenek feltöltött képek a galériában.</h4>
+      <div className="card-pink p-4 p-md-5 w-100 shadow-sm animate-fade-up" style={{ maxWidth: '1200px' }}>
+        
+        <div className="text-center mb-4 animate-fade-up delay-1">
+          <h1 className="fw-bold mb-3" style={{ fontSize: 'clamp(2rem, 3.8vw, 2.8rem)' }}>
+            Munkáink & Galéria
+          </h1>
+          <p className="lead mx-auto mb-0 text-center" style={{ maxWidth: '700px' }}>
+            Tekintsd meg szakembereink legfrissebb körmös munkáit! Meríts ihletet a következő szettedhez az elkészült manikűrökből és pedikűrökből.
+          </p>
         </div>
-      ) : (
-        <div className="row g-4">
-          {images.map((item) => (
-            <div key={item.kep_id} className="col-sm-6 col-md-4 col-lg-3">
+
+        <hr className="salon-divider my-4 my-md-4" style={{ opacity: 0.2 }} />
+
+        {loading ? (
+          <p className="text-center fw-bold fs-5 py-5">Képek betöltése...</p>
+        ) : images.length === 0 ? (
+          <div className="card-powder p-5 text-center shadow-sm rounded">
+            <h4 className="fw-bold m-0">Még nincsenek feltöltött képek a galériában.</h4>
+          </div>
+        ) : (
+          <div className="row g-4">
+            {images.map((item, index) => (
               <div 
-                className="card-white h-100 overflow-hidden shadow-sm d-flex flex-column"
-                style={{ cursor: 'pointer' }}
-                onClick={() => setSelectedImage(item)}
+                key={item.kep_id} 
+                className="col-sm-6 col-md-4 col-lg-3 animate-fade-up"
+                style={{ animationDelay: `${Math.min(index * 0.08, 0.6)}s` }}
               >
-
                 <div 
-                  style={{ 
-                    height: '260px', 
-                    overflow: 'hidden', 
-                    backgroundColor: 'var(--login-bg)',
-                    borderBottom: 'var(--salon-border)' 
-                  }}
+                  className="card-white h-100 overflow-hidden shadow-sm d-flex flex-column card-hover-effect"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => setSelectedImage(item)}
                 >
-                  <img 
-                    src={item.kep_url} 
-                    alt={item.leiras || 'Köröm minta'} 
-                    className="w-100 h-100"
-                    style={{ objectFit: 'cover', display: 'block' }}
-                  />
-                </div>
-
-                <div className="p-3 d-flex flex-column justify-content-between flex-grow-1 text-center">
-                  <div>
-                    <h6 className="fw-bold mb-1">
-                      {item.leiras || 'Köröm mintázat'}
-                    </h6>
-                    <p className="m-0 small">
-                      Készítette: <strong>{item.alkalmazott?.vezeteknev} {item.alkalmazott?.keresztnev}</strong>
-                    </p>
+                  <div 
+                    style={{ 
+                      height: '240px', 
+                      overflow: 'hidden', 
+                      backgroundColor: 'var(--login-bg)',
+                      borderBottom: 'var(--salon-border)' 
+                    }}
+                  >
+                    <img 
+                      src={item.kep_url} 
+                      alt={item.leiras || 'Köröm minta'} 
+                      className="w-100 h-100"
+                      style={{ objectFit: 'cover', display: 'block' }}
+                    />
                   </div>
-                  <div className="salon-divider pt-2 mt-2 text-center">
-                    <small className="opacity-75" style={{ fontSize: '0.75rem' }}>
-                      📅 {dayjs(item.feltoltes_ideje).format('YYYY.MM.DD.')}
-                    </small>
+
+                  <div className="p-3 d-flex flex-column justify-content-between flex-grow-1 text-center">
+                    <div>
+                      <h6 className="fw-bold mb-1">
+                        {item.leiras || 'Köröm mintázat'}
+                      </h6>
+                      <p className="m-0 small">
+                        Készítette: <strong>{item.alkalmazott?.vezeteknev} {item.alkalmazott?.keresztnev}</strong>
+                      </p>
+                    </div>
+                    <div className="salon-divider pt-2 mt-2 text-center">
+                      <small className="opacity-75" style={{ fontSize: '0.75rem' }}>
+                        📅 {dayjs(item.feltoltes_ideje).format('YYYY.MM.DD.')}
+                      </small>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        )}
+
+      </div>
 
       {selectedImage && (
         <div 

@@ -7,12 +7,12 @@ const Hazirend = () => {
   const bookingLink = isLoggedIn ? '/foglalas' : '/login';
 
   return (
-    <div className="container mt-5 mb-5 d-flex justify-content-center">
+    <div className="container mt-4 mt-md-5 mb-5 d-flex justify-content-center px-2 px-sm-3">
       
-      <div className="card-pink p-4 p-md-5 w-100 shadow-sm" style={{ maxWidth: '1000px' }}>
+      <div className="card-pink p-4 p-md-5 w-100 shadow-sm animate-fade-up" style={{ maxWidth: '1000px' }}>
         
-        <div className="text-center mb-5">
-          <h1 className="fw-bold mb-2" style={{ letterSpacing: '1px' }}>
+        <div className="text-center mb-4 animate-fade-up delay-1">
+          <h1 className="fw-bold mb-2" style={{ fontSize: 'clamp(2rem, 3.8vw, 2.8rem)', letterSpacing: '1px' }}>
             HÁZIREND
           </h1>
           <p className="lead m-0 fw-semibold">
@@ -20,12 +20,12 @@ const Hazirend = () => {
           </p>
         </div>
 
-        <div className="card-white p-4 mb-4 shadow-sm">
+        <hr className="salon-divider my-4 my-md-4" style={{ opacity: 0.2 }} />
+
+        <div className="card-white p-4 mb-4 shadow-sm card-hover-effect animate-fade-up delay-2">
           <div className="d-flex align-items-center gap-3 mb-3">
             <i className="fa-solid fa-handshake-simple fa-2x"></i>
-            <h3 className="fw-bold m-0 fs-5">
-              Fizetés & Miért nem kérünk előleget?
-            </h3>
+            <h3 className="fw-bold m-0 fs-5">Fizetés & Miért nem kérünk előleget?</h3>
           </div>
           <p className="m-0" style={{ lineHeight: '1.7' }}>
             Szalonunkban a foglalás <strong>előlegmentes</strong>, mert hiszünk a vendégeinkkel kialakított kölcsönös bizalomban és szeretnénk a foglalást a lehető leggyorsabbá tenni. 
@@ -33,12 +33,10 @@ const Hazirend = () => {
           </p>
         </div>
 
-        <div className="card-white p-4 mb-4 shadow-sm">
+        <div className="card-white p-4 mb-4 shadow-sm card-hover-effect animate-fade-up delay-3">
           <div className="d-flex align-items-center gap-3 mb-3">
             <i className="fa-regular fa-clock fa-2x"></i>
-            <h3 className="fw-bold m-0 fs-5">
-              Lemondási feltételek & 24 órás szabályzat
-            </h3>
+            <h3 className="fw-bold m-0 fs-5">Lemondási feltételek & 24 órás szabályzat</h3>
           </div>
           <ul className="m-0 ps-3 d-flex flex-column gap-2" style={{ lineHeight: '1.6' }}>
             <li>
@@ -53,12 +51,10 @@ const Hazirend = () => {
           </ul>
         </div>
 
-        <div className="card-white p-4 mb-4 shadow-sm">
+        <div className="card-white p-4 mb-4 shadow-sm card-hover-effect animate-fade-up delay-4">
           <div className="d-flex align-items-center gap-3 mb-3">
             <i className="fa-solid fa-person-walking-arrow-right fa-2x"></i>
-            <h3 className="fw-bold m-0 fs-5">
-              Érkezés, késés és kísérők
-            </h3>
+            <h3 className="fw-bold m-0 fs-5">Érkezés, késés és kísérők</h3>
           </div>
           <ul className="m-0 ps-3 d-flex flex-column gap-2" style={{ lineHeight: '1.6' }}>
             <li>
@@ -73,12 +69,10 @@ const Hazirend = () => {
           </ul>
         </div>
 
-        <div className="card-white p-4 mb-4 shadow-sm">
+        <div className="card-white p-4 mb-4 shadow-sm card-hover-effect animate-fade-up delay-4">
           <div className="d-flex align-items-center gap-3 mb-3">
             <i className="fa-solid fa-shield-heart fa-2x"></i>
-            <h3 className="fw-bold m-0 fs-5">
-              Kezelés alatti etikett, egészség és garancia
-            </h3>
+            <h3 className="fw-bold m-0 fs-5">Kezelés alatti etikett, egészség és garancia</h3>
           </div>
           <ul className="m-0 ps-3 d-flex flex-column gap-2" style={{ lineHeight: '1.6' }}>
             <li>
@@ -93,13 +87,13 @@ const Hazirend = () => {
           </ul>
         </div>
 
-        <div className="card-powder p-3 rounded text-center mb-4" style={{ borderStyle: 'dashed' }}>
+        <div className="card-powder p-3 rounded text-center mb-4 animate-fade-up delay-4" style={{ borderStyle: 'dashed' }}>
           <p className="m-0 fw-bold small">
             📌 Az online időpontfoglalás elküldésével a szalon Házirendje automatikusan elfogadottnak minősül.
           </p>
         </div>
 
-        <div className="text-center pt-2">
+        <div className="text-center pt-2 animate-fade-up delay-4">
           <Link to={bookingLink} className="btn btn-dark px-5 py-3 fs-5 shadow-sm">
             MEGÉRTETTEM, IDŐPONTOT FOGLALOK
           </Link>
