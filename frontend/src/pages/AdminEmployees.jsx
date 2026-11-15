@@ -87,7 +87,7 @@ const AdminEmployees = () => {
       } else {
         const response = await axios.post('http://localhost:3000/api/admin/employees', formData);
         if (response.data.success) {
-          alert(`${response.data.message}\nAz automatikusan generált jelszó: ${response.data.defaultPassword}\nKérjük, adja át a dolgozónak!`);
+          alert(`${response.data.message}\nAz automatikusan generált jelszó: ${response.data.defaultPassword}\nKérlek, add át a dolgozónak!`);
           setShowModal(false);
           fetchData();
         }

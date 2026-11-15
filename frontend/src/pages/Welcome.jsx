@@ -65,7 +65,7 @@ const Welcome = () => {
         style={{ maxWidth: '1150px', minHeight: '520px' }}
       >
         <h1 className="fw-bold mb-4 mb-md-5" style={{ fontSize: 'clamp(1.8rem, 4vw, 2.8rem)' }}>
-          Üdvözöljük {userName}!
+          Üdvözlünk {userName}!
         </h1>
 
         {feedback.text && (

@@ -9,7 +9,7 @@ const AdminDashboard = () => {
     <div className="container mt-5 mb-5 d-flex justify-content-center">
       <div className="col-lg-10 content-card-wrapper p-5 shadow-sm">
         
-        <h1 className="mb-5 fw-bold">Üdvözöljük, {userName}!</h1>
+        <h1 className="mb-5 fw-bold">Üdvözlünk, {userName}!</h1>
 
         <div className="row g-4">
           <div className="col-md-4">

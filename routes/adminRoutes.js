@@ -12,7 +12,7 @@ const verifyAdmin = async (req, res, next) => {
     if (!authHeader) return res.status(401).json({ success: false, message: "Bejelentkezés szükséges!" });
 
     const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.JWT_SECRET || 'titokkulcs', async (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET, async (err, decoded) => {
         if (err) return res.status(403).json({ success: false, message: "Érvénytelen munkamenet." });
 
         const userId = decoded.id || decoded.felhasznalo_id;
@@ -40,8 +40,10 @@ router.get('/statistics', verifyAdmin, async (req, res) => {
         const startDate = dayjs(`${year}-${month}-01`).startOf('month').toDate();
         const endDate = dayjs(`${year}-${month}-01`).endOf('month').toDate();
 
+        // A lemondott (3-as státuszú) foglalásokat nem számoljuk bele az aktív forgalomba
         const bookings = await prisma.foglalasok.findMany({
             where: {
+                statusz_id: { not: 3 },
                 kezdo_idopont: { gte: startDate, lte: endDate }
             },
             include: {
@@ -56,9 +58,8 @@ router.get('/statistics', verifyAdmin, async (req, res) => {
         const noShowCount = bookings.filter(b => b.statusz?.statusz_neve === 'Nem jelent meg').length;
         const pendingCount = bookings.filter(b => b.statusz?.statusz_neve === 'Jóváhagyva').length;
 
-
         const closedCount = completedCount + noShowCount;
-        const attendanceRate = closedCount > 0 ? Math.round((completedCount / closedCount) * 100) : 100;
+        const attendanceRate = closedCount > 0 ? Math.round((completedCount / closedCount) * 100) : null;
 
         // 2. Szolgáltatások népszerűsége (Darabszám szerint rendezve)
         const serviceMap = {};
@@ -74,7 +75,6 @@ router.get('/statistics', verifyAdmin, async (req, res) => {
 
         const topServices = Object.values(serviceMap).sort((a, b) => b.count - a.count);
 
-        
         const employeeMap = {};
         bookings.forEach(b => {
             const id = b.alkalmazott_id;
@@ -111,20 +111,22 @@ router.get('/statistics', verifyAdmin, async (req, res) => {
     }
 });
 
-
+// Admin összesített naptár eseményei
 router.get('/calendar-events', verifyAdmin, async (req, res) => {
     const { employeeId } = req.query;
 
     try {
-        
         const whereClause = {};
         if (employeeId && employeeId !== 'all') {
             whereClause.alkalmazott_id = parseInt(employeeId);
         }
 
-        
+        // Csak a nem lemondott foglalások jelennek meg a naptárban
         const bookings = await prisma.foglalasok.findMany({
-            where: whereClause,
+            where: {
+                ...whereClause,
+                statusz_id: { not: 3 }
+            },
             include: {
                 vendeg: { select: { vezeteknev: true, keresztnev: true, telefon: true, email: true } },
                 szolgaltatas: true,
@@ -133,7 +135,7 @@ router.get('/calendar-events', verifyAdmin, async (req, res) => {
             }
         });
 
-        
+        // A szabadságok táblában nincs statusz_id, így oda az eredeti whereClause megy
         const vacations = await prisma.szabadsagok.findMany({
             where: whereClause,
             include: {
@@ -141,7 +143,6 @@ router.get('/calendar-events', verifyAdmin, async (req, res) => {
             }
         });
 
-        
         const events = [
             ...bookings.map(b => ({
                 id: `booking-${b.foglalas_id}`,

@@ -13,7 +13,7 @@ const verifyToken = (req, res, next) => {
     if (!authHeader) return res.json({ success: false, message: "Nincs bejelentkezve!" });
     
     const token = authHeader.split(" ")[1]; 
-    jwt.verify(token, process.env.JWT_SECRET || 'titokkulcs', (err, decoded) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
         if (err) return res.json({ success: false, message: "Érvénytelen vagy lejárt token!" });
         req.user = decoded; 
         next();
@@ -99,7 +99,7 @@ router.post('/login', async (req, res) => {
 
         const token = jwt.sign(
             { id: felhasznalo.felhasznalo_id, email: felhasznalo.email }, 
-            process.env.JWT_SECRET || 'titokkulcs', 
+            process.env.JWT_SECRET, 
             { expiresIn: '1h' }
         );
 
@@ -208,7 +208,7 @@ router.post('/forgot-password', async (req, res) => {
         const user = await prisma.felhasznalok.findUnique({ where: { email } });
         if (!user) return res.json({ success: false, message: "Ezzel az e-mail címmel nincs fiók regisztrálva!" });
 
-        const resetToken = jwt.sign({ id: user.felhasznalo_id }, process.env.JWT_SECRET || 'titokkulcs', { expiresIn: '1h' });
+        const resetToken = jwt.sign({ id: user.felhasznalo_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
         // Kiküldjük az éles formázott levelet a Gmailen keresztül
         await emailService.sendPasswordReset(user.email, resetToken);
@@ -224,7 +224,7 @@ router.post('/forgot-password', async (req, res) => {
 router.post('/reset-password', async (req, res) => {
     const { token, ujJelszo } = req.body;
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET || 'titokkulcs');
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
         const user = await prisma.felhasznalok.findUnique({ where: { felhasznalo_id: decoded.id } });
         
         const egyezik = await bcrypt.compare(ujJelszo, user.jelszo);

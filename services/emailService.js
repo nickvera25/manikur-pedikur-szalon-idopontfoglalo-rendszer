@@ -144,7 +144,7 @@ const emailService = {
             </div>
 
             <p style="font-size: 13px; color: #555;">
-                📌 <em>Kérjük, érkezz pontosan és kísérő nélkül, hogy a kezelést zavartalanul el tudjuk végezni!</em>
+                📌 <em>Kérlek, érkezz pontosan és kísérő nélkül, hogy a kezelést zavartalanul el tudjuk végezni!</em>
             </p>
         `;
         return transporter.sendMail({

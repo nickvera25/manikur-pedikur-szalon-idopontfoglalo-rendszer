@@ -14,7 +14,7 @@ const verifyToken = (req, res, next) => {
         return res.status(401).json({ success: false, message: "A művelethez be kell jelentkezned!" });
     }
     const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.JWT_SECRET || 'titokkulcs', (err, user) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) return res.status(403).json({ success: false, message: "Érvénytelen munkamenet." });
         req.user = user;
         next();
@@ -41,7 +41,7 @@ router.get('/services/:categoryId', async (req, res) => {
         });
         res.json({ success: true, data: szolgaltatasok });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Hiba a szolgáltatások lekérésekor." });
+        res.status(500).json({ success: false, message: "Hiba a szolgáltatás lekérésekor." });
     }
 });
 
@@ -153,6 +153,7 @@ router.get('/available-slots', async (req, res) => {
         const existingBookings = await prisma.foglalasok.findMany({
             where: {
                 alkalmazott_id: empId,
+                statusz_id: { not: 3 },
                 kezdo_idopont: { gte: startOfDay, lte: endOfDay }
             }
         });
@@ -226,9 +227,11 @@ router.post('/book', verifyToken, async (req, res) => {
         if (!statusz) statusz = await prisma.foglalas_statuszok.findFirst();
 
         const result = await prisma.$transaction(async (tx) => {
+            // Lemondott foglalással (statusz_id: 3) nem ütközhet
             const conflict = await tx.foglalasok.findFirst({
                 where: {
                     alkalmazott_id: empId,
+                    statusz_id: { not: 3 },
                     kezdo_idopont: { lt: vegIdopont },
                     veg_idopont: { gt: kezdoIdopont }
                 }
@@ -283,7 +286,7 @@ router.post('/book', verifyToken, async (req, res) => {
     }
 });
 
-// 6. Közelgő foglalások
+// 6. Közelgő foglalások (csak a nem lemondottak jelennek meg!)
 router.get('/my-bookings/upcoming', verifyToken, async (req, res) => {
     const vendegId = req.user.id || req.user.felhasznalo_id;
 
@@ -291,6 +294,7 @@ router.get('/my-bookings/upcoming', verifyToken, async (req, res) => {
         const bookings = await prisma.foglalasok.findMany({
             where: {
                 vendeg_id: vendegId,
+                statusz_id: { not: 3 },
                 kezdo_idopont: { gte: dayjs().toDate() }
             },
             include: {
@@ -309,7 +313,6 @@ router.get('/my-bookings/upcoming', verifyToken, async (req, res) => {
     }
 });
 
-// 6.B Korábbi foglalások
 router.get('/my-bookings/past', verifyToken, async (req, res) => {
     const vendegId = req.user.id || req.user.felhasznalo_id;
 
@@ -317,6 +320,7 @@ router.get('/my-bookings/past', verifyToken, async (req, res) => {
         const bookings = await prisma.foglalasok.findMany({
             where: {
                 vendeg_id: vendegId,
+                statusz_id: { not: 3 },
                 kezdo_idopont: { lt: dayjs().toDate() }
             },
             include: {
@@ -335,7 +339,7 @@ router.get('/my-bookings/past', verifyToken, async (req, res) => {
     }
 });
 
-// 7. foglalás lemondasa
+// 7. foglalás lemondása
 router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
     const vendegId = req.user.id || req.user.felhasznalo_id;
     const bookingId = parseInt(req.params.id);
@@ -354,6 +358,10 @@ router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
             return res.status(404).json({ success: false, message: "A foglalás nem található vagy nincs hozzá jogosultságod." });
         }
 
+        if (booking.statusz_id === 3) {
+            return res.status(400).json({ success: false, message: "Ez a foglalás már korábban le lett mondva!" });
+        }
+
         const guest = booking.vendeg;
         const now = dayjs();
         const bookingStart = dayjs(booking.kezdo_idopont);
@@ -366,8 +374,9 @@ router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
             });
         }
 
-        await prisma.foglalasok.delete({
-            where: { foglalas_id: bookingId }
+        await prisma.foglalasok.update({
+            where: { foglalas_id: bookingId },
+            data: { statusz_id: 3 }
         });
 
         await prisma.ertesitesek.create({
@@ -383,7 +392,7 @@ router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
                 vendegNev: `${guest.vezeteknev} ${guest.keresztnev}`,
                 szolgaltatasNev: booking.szolgaltatas.szolgaltatas_neve,
                 idopont: booking.kezdo_idopont,
-                indok: "Az időpontodat a kérésedre sikeresen töröltük a rendszerből."
+                indok: "Az időpontodat a kérésedre sikeresen lemondtuk a rendszerben."
             }).catch(err => console.error("E-mail küldési hiba lemondáskor:", err));
         }
 

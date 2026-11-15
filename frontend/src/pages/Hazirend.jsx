@@ -61,7 +61,7 @@ const Hazirend = () => {
               <strong>Kérlek, egyedül érkezz:</strong> Szalonunk a nyugodt relaxáció szigete, emellett a férőhelyeink száma is korlátozott. Kérünk, hogy kísérő (barátnő, párod, gyermek, kisállat) nélkül érkezz a kezelésre.
             </li>
             <li>
-              <strong>Pontosság & Késés:</strong> Kérjük, pontosan érkezz! <strong>10–15 perc késés</strong> esetén már csak egyszerűbb, egyszínű szett készítésére van lehetőség, hogy a következő vendég kezdését ne csúsztassuk el.
+              <strong>Pontosság & Késés:</strong> Kérlek, pontosan érkezz! <strong>10–15 perc késés</strong> esetén már csak egyszerűbb, egyszínű szett készítésére van lehetőség, hogy a következő vendég kezdését ne csúsztassuk el.
             </li>
             <li>
               <strong>15 perc feletti késés:</strong> Sajnos a szolgáltatást már nem tudjuk elvégezni, és az időpont elveszettnek minősül.

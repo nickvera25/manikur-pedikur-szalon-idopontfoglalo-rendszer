@@ -43,7 +43,7 @@ const verifyToken = (req, res, next) => {
     if (!authHeader) return res.status(401).json({ success: false, message: "Bejelentkezés szükséges!" });
 
     const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.JWT_SECRET || 'titokkulcs', (err, user) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) return res.status(403).json({ success: false, message: "Érvénytelen token." });
         req.user = user;
         next();
@@ -125,3 +125,14 @@ router.delete('/gallery/:id', verifyToken, async (req, res) => {
 });
 
 module.exports = router;
+
+const jelszoJo = await bcrypt.compare(jelszo, felhasznalo.jelszo);
+if (!jelszoJo) {
+    return res.json({ success: false, message: "Hibás e-mail cím vagy jelszó!" });
+}
+
+const token = jwt.sign(
+    { id: felhasznalo.felhasznalo_id, email: felhasznalo.email },
+    process.env.JWT_SECRET,
+    { expiresIn: '1h' }
+);

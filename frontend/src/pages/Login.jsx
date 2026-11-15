@@ -76,7 +76,7 @@ const Login = () => {
 
           <div className="col-md-6 p-4 p-md-5 d-flex flex-column justify-content-center align-items-center text-center">
             <img src="/logo.png" alt="Nails by Vera Logó" className="img-fluid mb-4" style={{ maxWidth: '180px' }} />
-            <h1 className="fs-3 fw-bold mb-4">Üdvözöljük az oldalon!</h1>
+            <h1 className="fs-3 fw-bold mb-4">Üdvözlünk az oldalon!</h1>
             <p className="m-0 fs-6">
               Még nincs fiókod? 
               <Link to="/register" className="fw-bold text-decoration-none forget-link ms-1">Regisztrálj itt!</Link>

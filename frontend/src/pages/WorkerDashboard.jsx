@@ -63,7 +63,7 @@ const WorkerDashboard = () => {
         style={{ maxWidth: '1150px', minHeight: '520px' }}
       >
         <h1 className="fw-bold mb-5" style={{ fontSize: '2.8rem' }}>
-          Üdvözöljük {userName}!
+          Üdvözlünk {userName}!
         </h1>
 
         <div 

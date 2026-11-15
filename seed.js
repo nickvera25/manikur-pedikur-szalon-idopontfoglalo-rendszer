@@ -17,6 +17,7 @@ async function main() {
       { statusz_neve: 'Jóváhagyva' },
       { statusz_neve: 'Teljesítve' },
       { statusz_neve: 'Lemondva' }
+      { statusz_neve: 'Nem jelent meg' }
     ]
   });
 

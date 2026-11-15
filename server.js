@@ -46,6 +46,7 @@ async function sendDailyReminders() {
 
         const bookings = await prisma.foglalasok.findMany({
             where: {
+                statusz_id: { not: 3 },
                 kezdo_idopont: { gte: tomorrowStart, lte: tomorrowEnd }
             },
             include: {
@@ -77,15 +78,6 @@ async function sendDailyReminders() {
 cron.schedule('0 8 * * *', async () => {
     console.log('[CRON] Reggeli 08:00-as automatikus emlékeztető futtatása...');
     await sendDailyReminders();
-});
-
-app.get('/api/test-reminder', async (req, res) => {
-    try {
-        const count = await sendDailyReminders();
-        res.json({ success: true, message: `Sikeres teszt! ${count} db holnapi emlékeztető kiküldve.` });
-    } catch (err) {
-        res.status(500).json({ success: false, message: "Hiba az emlékeztetők küldésekor." });
-    }
 });
 
 // Szerver indítása

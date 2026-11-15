@@ -25,7 +25,7 @@ const ForcedPasswordChange = () => {
       );
 
       if (response.data.success) {
-        alert("Sikeres jelszóváltoztatás! Kérjük, jelentkezz be újra.");
+        alert("Sikeres jelszóváltoztatás! Kérlek, jelentkezz be újra.");
         localStorage.clear();
         navigate('/login');
       } else {

@@ -14,7 +14,7 @@ const verifyToken = (req, res, next) => {
         return res.status(401).json({ success: false, message: "A funkcióhoz be kell jelentkezned!" });
     }
     const token = authHeader.split(' ')[1];
-    jwt.verify(token, process.env.JWT_SECRET || 'titokkulcs', (err, user) => {
+    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) return res.status(403).json({ success: false, message: "Érvénytelen vagy lejárt token!" });
         req.user = user;
         next();
@@ -40,7 +40,6 @@ router.get('/munkarend', verifyToken, async (req, res) => {
 
 // 2. MUNKAREND MENTÉSE (A tokenből olvasott ID alapján!)
 router.post('/munkarend', verifyToken, async (req, res) => {
-    // A tokenből olvassuk ki, ki van bejelentkezve, nem bízunk a kliens body-ban!
     const empId = req.user.id || req.user.felhasznalo_id;
     const { hetiBeosztas } = req.body;
 
@@ -73,7 +72,7 @@ router.post('/munkarend', verifyToken, async (req, res) => {
     }
 });
 
-// 3. TÁVOLLÉTEK / SZABADSÁGOK LEKÉRÉSE (A bejelentkezett alkalmazottnak)
+// 3. TÁVOLLÉTEK / SZABADSÁGOK LEKÉRÉSE
 router.get('/szabadsagok', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
 
@@ -89,7 +88,7 @@ router.get('/szabadsagok', verifyToken, async (req, res) => {
     }
 });
 
-// 4. ÚJ TÁVOLLÉT / SZABADSÁG FELVÉTELE + ÜTKÖZŐ FOGLALÁSOK AUTOMATIKUS TÖRLÉSE
+// 4. ÚJ TÁVOLLÉT / SZABADSÁG FELVÉTELE + ÜTKÖZŐ FOGLALÁSOK STÁTUSZÁNAK ÁLLÍTÁSA LEMONDVÁRA
 router.post('/szabadsagok', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
     const { kezdo_datum, veg_datum, megjegyzes } = req.body;
@@ -109,6 +108,7 @@ router.post('/szabadsagok', verifyToken, async (req, res) => {
         const conflictingBookings = await prisma.foglalasok.findMany({
             where: {
                 alkalmazott_id: empId,
+                statusz_id: { not: 3 },
                 kezdo_idopont: { lt: end },
                 veg_idopont: { gt: start }
             },
@@ -120,15 +120,16 @@ router.post('/szabadsagok', verifyToken, async (req, res) => {
         });
 
         for (const booking of conflictingBookings) {
-            await prisma.foglalasok.delete({
-                where: { foglalas_id: booking.foglalas_id }
+            await prisma.foglalasok.update({
+                where: { foglalas_id: booking.foglalas_id },
+                data: { statusz_id: 3 }
             });
 
             await prisma.ertesitesek.create({
                 data: {
                     felhasznalo_id: booking.vendeg_id,
-                    tipus: "Időpont törölve a szakember távolléte miatt",
-                    uzenet_szovege: `Sajnálattal tájékoztatunk, hogy a(z) ${booking.szolgaltatas.szolgaltatas_neve} időpontod (${new Date(booking.kezdo_idopont).toLocaleString('hu-HU')}) a szakember váratlan távolléte/szabadsága miatt törlésre került.`
+                    tipus: "Időpont lemondva a szakember távolléte miatt",
+                    uzenet_szovege: `Sajnálattal tájékoztatunk, hogy a(z) ${booking.szolgaltatas.szolgaltatas_neve} időpontod (${new Date(booking.kezdo_idopont).toLocaleString('hu-HU')}) a szakember váratlan távolléte/szabadsága miatt lemondásra került.`
                 }
             });
 
@@ -137,11 +138,11 @@ router.post('/szabadsagok', verifyToken, async (req, res) => {
                     vendegNev: `${booking.vendeg.vezeteknev} ${booking.vendeg.keresztnev}`,
                     szolgaltatasNev: booking.szolgaltatas.szolgaltatas_neve,
                     idopont: booking.kezdo_idopont,
-                    indok: `A szakember váratlan távolléte / szabadsága miatt (${megjegyzes || 'Szabadság'}). Kérjük, válassz másik időpontot!`
-                }).catch(err => console.error("E-mail küldési hiba szabadság miatti törléskor:", err));
+                    indok: `A szakember váratlan távolléte / szabadsága miatt (${megjegyzes || 'Szabadság'}). Kérlek, válassz másik időpontot!`
+                }).catch(err => console.error("E-mail küldési hiba szabadság miatti lemondáskor:", err));
             }
         }
-t
+
         const ujSzabadsag = await prisma.szabadsagok.create({
             data: {
                 alkalmazott_id: empId,
@@ -153,7 +154,7 @@ t
 
         let responseMessage = "Távollét sikeresen rögzítve!";
         if (conflictingBookings.length > 0) {
-            responseMessage += ` Figyelem: ${conflictingBookings.length} db ütköző vendégfoglalás automatikusan törlésre került és a vendégek értesítést kaptak!`;
+            responseMessage += ` Figyelem: ${conflictingBookings.length} db ütköző vendégfoglalás automatikusan lemondásra került és a vendégek értesítést kaptak!`;
         }
 
         res.json({ success: true, message: responseMessage, data: ujSzabadsag });
@@ -164,7 +165,7 @@ t
     }
 });
 
-// 5. TÁVOLLÉT TÖRLÉSE (Ha mégis dolgozik)
+// 5. TÁVOLLÉT TÖRLÉSE
 router.delete('/szabadsagok/:id', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
     const szabId = parseInt(req.params.id);
@@ -182,14 +183,17 @@ router.delete('/szabadsagok/:id', verifyToken, async (req, res) => {
     }
 });
 
-// 6. ALKALMAZOTTI NAPTÁR ESEMÉNYEINEK LEKÉRÉSE (Foglalások + Szabadságok)
+// 6. ALKALMAZOTTI NAPTÁR ESEMÉNYEINEK LEKÉRÉSE
 router.get('/employee-calendar', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
 
     try {
-        // 1. Foglalások lekérése
+        // 1. Foglalások lekérése (a lemondottakat nem jelenítjük meg)
         const bookings = await prisma.foglalasok.findMany({
-            where: { alkalmazott_id: empId },
+            where: { 
+                alkalmazott_id: empId,
+                statusz_id: { not: 3 }
+            },
             include: {
                 vendeg: { select: { vezeteknev: true, keresztnev: true, telefon: true, email: true } },
                 szolgaltatas: true,
@@ -202,7 +206,6 @@ router.get('/employee-calendar', verifyToken, async (req, res) => {
             where: { alkalmazott_id: empId }
         });
 
-        // Események formázása a FullCalendar számára
         const events = [
             ...bookings.map(b => ({
                 id: `booking-${b.foglalas_id}`,
@@ -246,7 +249,7 @@ router.get('/employee-calendar', verifyToken, async (req, res) => {
     }
 });
 
-// 7. ALKALMAZOTTI IDŐPONT LEMONDÁS (Vendég értesítésével)
+// 7. ALKALMAZOTTI IDŐPONT LEMONDÁS
 router.delete('/cancel-appointment/:id', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
     const bookingId = parseInt(req.params.id);
@@ -263,17 +266,17 @@ router.delete('/cancel-appointment/:id', verifyToken, async (req, res) => {
 
         const guest = booking.vendeg;
         const bookingStart = dayjs(booking.kezdo_idopont);
-        const cancelledDateStr = bookingStart.format('YYYY-MM-DD');
         const cancelledTimeStr = bookingStart.format('HH:mm');
 
-        await prisma.foglalasok.delete({
-            where: { foglalas_id: bookingId }
+        await prisma.foglalasok.update({
+            where: { foglalas_id: bookingId },
+            data: { statusz_id: 3 }
         });
 
         await prisma.ertesitesek.create({
             data: {
                 felhasznalo_id: booking.vendeg_id,
-                tipus: "Időpont törölve a szolgáltató által",
+                tipus: "Időpont lemondva a szolgáltató által",
                 uzenet_szovege: `A(z) ${bookingStart.format('YYYY.MM.DD. HH:mm')} időpontra lefoglalt ${booking.szolgaltatas.szolgaltatas_neve} kezelésedet a szakember lemondta.`
             }
         });
@@ -283,7 +286,7 @@ router.delete('/cancel-appointment/:id', verifyToken, async (req, res) => {
                 vendegNev: `${guest.vezeteknev} ${guest.keresztnev}`,
                 szolgaltatasNev: booking.szolgaltatas.szolgaltatas_neve,
                 idopont: booking.kezdo_idopont,
-                indok: `A kezelést a szakember (${booking.alkalmazott.vezeteknev} ${booking.alkalmazott.keresztnev}) váratlan akadályoztatás miatt lemondta. Kérjük, foglalj új időpontot a weboldalon!`
+                indok: `A kezelést a szakember (${booking.alkalmazott.vezeteknev} ${booking.alkalmazott.keresztnev}) váratlan akadályoztatás miatt lemondta. Kérlek, foglalj új időpontot a weboldalon!`
             }).catch(err => console.error("E-mail hiba alkalmazotti lemondáskor:", err));
         }
 
@@ -299,11 +302,8 @@ router.delete('/cancel-appointment/:id', verifyToken, async (req, res) => {
         });
 
         const eligibleUsers = waitlistedUsers.filter(w => {
-            
             if (w.vendeg_id === booking.vendeg_id) return false;
-
             if (!w.idosav_tol || !w.idosav_ig) return true;
-
             return cancelledTimeStr >= w.idosav_tol && cancelledTimeStr < w.idosav_ig;
         });
 
@@ -318,12 +318,12 @@ router.delete('/cancel-appointment/:id', verifyToken, async (req, res) => {
 
         res.json({ 
             success: true, 
-            message: `Időpont sikeresen törölve! A vendéget értesítettük, és ${eligibleUsers.length} db várólistás kapott értesítést a megüresedett helyről.` 
+            message: `Időpont sikeresen lemondva! A vendéget értesítettük, és ${eligibleUsers.length} db várólistás kapott értesítést a megüresedett helyről.` 
         });
 
     } catch (error) {
-        console.error("Hiba az időpont törlésekor:", error);
-        res.status(500).json({ success: false, message: "Hiba az időpont törlésekor." });
+        console.error("Hiba az időpont lemondásakor:", error);
+        res.status(500).json({ success: false, message: "Hiba az időpont lemondásakor." });
     }
 });
 
@@ -338,6 +338,7 @@ router.get('/today-schedule', verifyToken, async (req, res) => {
         const todayBookings = await prisma.foglalasok.findMany({
             where: {
                 alkalmazott_id: empId,
+                statusz_id: { not: 3 },
                 kezdo_idopont: {
                     gte: todayStart,
                     lte: todayEnd

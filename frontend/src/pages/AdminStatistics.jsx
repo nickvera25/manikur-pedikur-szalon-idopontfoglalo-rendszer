@@ -122,14 +122,18 @@ const AdminStatistics = () => {
               </div>
             </div>
 
-            <div className="col-sm-6 col-lg-3">
-              <div className="card-powder p-4 shadow-sm text-center h-100 d-flex flex-column justify-content-between">
-                <div className="mb-2"><i className="fa-solid fa-percent fa-2x"></i></div>
-                <h6 className="fw-bold m-0">Megjelenési arány</h6>
-                <h2 className="fw-bold my-2">{stats.attendanceRate}%</h2>
-                <small className="opacity-75">Vendégmegbízhatóság</small>
-              </div>
-            </div>
+<div className="col-sm-6 col-lg-3">
+  <div className="card-powder p-4 shadow-sm text-center h-100 d-flex flex-column justify-content-between">
+    <div className="mb-2"><i className="fa-solid fa-percent fa-2x"></i></div>
+    <h6 className="fw-bold m-0">Megjelenési arány</h6>
+    <h2 className="fw-bold my-2">
+      {stats.attendanceRate !== null && stats.attendanceRate !== undefined
+        ? `${stats.attendanceRate}%`
+        : 'Nincs adat'}
+    </h2>
+    <small className="opacity-75">Vendégmegbízhatóság</small>
+  </div>
+</div>
           </div>
 
 

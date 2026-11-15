@@ -69,7 +69,7 @@ const Home = () => {
                 Szépség és ápoltság <br /> valódi odafigyeléssel
               </h1>
               <p className="lead mb-4" style={{ lineHeight: '1.8' }}>
-                Üdvözöljük a Nails by Vera szalonban! Professzionális manikűr és pedikűr szolgáltatásokkal és minőségi anyagokkal várjuk. Lassítson le egy kicsit, és bízza ránk kezei és lábai ápolását.
+                Üdvözlünk a Nails by Vera szalonban! Professzionális manikűr és pedikűr szolgáltatásokkal és minőségi anyagokkal várunk. Lassíts le egy kicsit, és bízd ránk kezeid és lábaid ápolását.
               </p>
               <div className="d-flex mt-4">
                 <Link to={bookingLink} className="btn btn-dark px-5 py-3 fs-5 shadow-sm">
@@ -96,9 +96,8 @@ const Home = () => {
         {/* FINOM BELSŐ ELVÁLASZTÓ */}
         <hr className="salon-divider my-4" style={{ opacity: 0.2 }} />
 
-        {/* 2. RÉSZ: MIÉRT VÁLASSZA SZALONUNKAT? */}
         <section className="scroll-fade-in">
-          <h2 className="fw-bold mb-5 text-center">Miért válassza szalonunkat?</h2>
+          <h2 className="fw-bold mb-5 text-center">Miért válaszd szalonunkat?</h2>
           
           <div className="row g-4 text-center">
             <div className="col-md-4">
