@@ -158,9 +158,7 @@ const AdminCalendar = () => {
         </div>
       )}
 
-      {/* Reszponzív és arculati CSS */}
       <style>{`
-        /* Szalon stílusú naptár színek */
         .custom-admin-calendar .fc-col-header-cell,
         .custom-admin-calendar .fc-timegrid-axis,
         .custom-admin-calendar .fc-timegrid-slot-label {
@@ -186,7 +184,6 @@ const AdminCalendar = () => {
           font-size: 0.82rem;
         }
 
-        /* Fejléckezelő gombok szalon stílusa */
         .custom-admin-calendar .fc-button-primary {
           background-color: var(--text-and-btn, #4a3b32) !important;
           border-color: var(--text-and-btn, #4a3b32) !important;
@@ -201,7 +198,6 @@ const AdminCalendar = () => {
           border-color: #2b221d !important;
         }
 
-        /* Mobil nézet javítása (különösen telefonos felbontáson) */
         @media (max-width: 768px) {
           /* A fejléc gombjai nem csúsznak össze, hanem 3 kulturált sorba rendeződnek */
           .custom-admin-calendar .fc-header-toolbar {
@@ -228,7 +224,6 @@ const AdminCalendar = () => {
             font-size: 0.8rem !important;
           }
 
-          /* Heti nézet slot magasság mobilon */
           .custom-admin-calendar .fc-timegrid-slot {
             height: 30px !important;
           }

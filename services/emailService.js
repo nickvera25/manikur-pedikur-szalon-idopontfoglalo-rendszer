@@ -1,4 +1,4 @@
-// backend/services/emailService.js
+//services/emailService.js
 const nodemailer = require('nodemailer');
 const dayjs = require('dayjs');
 
@@ -10,7 +10,7 @@ const transporter = nodemailer.createTransport({
     }
 });
 
-// Közös HTML sablonkeret
+//HTML sablonkeret
 const wrapEmail = (title, content) => `
     <div style="background-color: #FEF9F9; font-family: 'Segoe UI', Arial, sans-serif; padding: 30px; color: #4F4646;">
         <div style="max-width: 550px; margin: 0 auto; background-color: #FFFFFF; border: 1.5px solid #4F4646; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05);">
@@ -31,7 +31,7 @@ const wrapEmail = (title, content) => `
 `;
 
 const emailService = {
-    // 1. FOGLALÁS VISSZAIGAZOLÁSA
+    //Foglalás visszaigazolása
     sendBookingConfirmation: async (toEmail, details) => {
         const content = `
             <p>Kedves <strong>${details.vendegNev}</strong>!</p>
@@ -56,7 +56,7 @@ const emailService = {
         });
     },
 
-    // 2. ELFELEJTETT JELSZÓ
+    // Elfelejtett jelszó visszaállítása
     sendPasswordReset: async (toEmail, resetToken) => {
         const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
         const content = `
@@ -81,7 +81,7 @@ const emailService = {
         });
     },
 
-    // 3. IDŐPONT LEMONDÁSA
+    // Időpont lemondása
     sendCancellation: async (toEmail, details) => {
         const content = `
             <p>Kedves <strong>${details.vendegNev}</strong>!</p>
@@ -103,7 +103,7 @@ const emailService = {
         });
     },
 
-    // 4. VÁRÓLISTA ÉRTESÍTŐ
+    // Várólista értesítés
     sendWaitlistNotification: async (toEmail, details) => {
         const bookingUrl = `${process.env.FRONTEND_URL || 'http://localhost:5173'}/foglalas`;
         const content = `
@@ -130,7 +130,7 @@ const emailService = {
         });
     },
 
-    // 5. 24 ÓRÁS AUTOMATIKUS IDŐPONT-EMLÉKEZTETŐ
+    // 24 órás emlékeztető
     sendReminder: async (toEmail, details) => {
         const content = `
             <p>Kedves <strong>${details.vendegNev}</strong>!</p>

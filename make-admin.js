@@ -1,4 +1,4 @@
-// backend/make-admin.js
+//make-admin.js
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 

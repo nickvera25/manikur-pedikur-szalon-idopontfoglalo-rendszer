@@ -1,4 +1,4 @@
-// backend/routes/authRoutes.js
+// routes/authRoutes.js
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcryptjs');
@@ -20,7 +20,7 @@ const verifyToken = (req, res, next) => {
     });
 };
 
-// Regisztrációs végpont (Telefonszám regex védelemmel)
+// Regisztráció
 router.post('/register', async (req, res) => {
     const { vezeteknev, keresztnev, telefon, email, jelszo } = req.body;
 
@@ -74,7 +74,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// Bejelentkezési végpont
+// Bejelentkezés
 router.post('/login', async (req, res) => {
     const { email, jelszo } = req.body;
 
@@ -201,7 +201,7 @@ router.put('/profile/password', verifyToken, async (req, res) => {
     }
 });
 
-// 4. ELFELEJTETT JELSZÓ (Éles e-mail küldés a tokenes linkkel!)
+// Elfelejtett jelszó, visszaállítási folyamat
 router.post('/forgot-password', async (req, res) => {
     const { email } = req.body;
     try {
@@ -210,7 +210,6 @@ router.post('/forgot-password', async (req, res) => {
 
         const resetToken = jwt.sign({ id: user.felhasznalo_id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-        // Kiküldjük az éles formázott levelet a Gmailen keresztül
         await emailService.sendPasswordReset(user.email, resetToken);
 
         res.json({ success: true, message: "A visszaállító linket elküldtük az e-mail címedre!" });
@@ -220,7 +219,7 @@ router.post('/forgot-password', async (req, res) => {
     }
 });
 
-// 5. Új jelszó mentése a token alapján
+//Új jelszó mentése
 router.post('/reset-password', async (req, res) => {
     const { token, ujJelszo } = req.body;
     try {

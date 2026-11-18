@@ -8,7 +8,6 @@ const CookieBanner = () => {
 useEffect(() => {
     const consent = localStorage.getItem('cookieConsent');
     if (!consent) {
-      // 1.8 másodperc késleltetés a természetes megjelenésért
       const timer = setTimeout(() => setIsVisible(true), 1800);
       return () => clearTimeout(timer);
     }

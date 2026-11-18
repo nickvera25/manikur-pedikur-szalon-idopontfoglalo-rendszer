@@ -1,4 +1,4 @@
-// backend/routes/bookingRoutes.js
+// routes/bookingRoutes.js
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
@@ -21,7 +21,7 @@ const verifyToken = (req, res, next) => {
     });
 };
 
-// 1. Kategóriák lekérése
+// Kategóriák lekérése
 router.get('/categories', async (req, res) => {
     try {
         const kategoriak = await prisma.kategoriak.findMany({ orderBy: { kategoria_neve: 'asc' } });
@@ -31,7 +31,7 @@ router.get('/categories', async (req, res) => {
     }
 });
 
-// 2. Szolgáltatások lekérése kategória szerint
+// Szolgáltatások lekérése kategória szerint
 router.get('/services/:categoryId', async (req, res) => {
     const catId = parseInt(req.params.categoryId);
     try {
@@ -45,7 +45,7 @@ router.get('/services/:categoryId', async (req, res) => {
     }
 });
 
-// Nyilvános: Az összes szolgáltatás a kezdőlaphoz
+// Az összes szolgáltatás a kezdőlaphoz
 router.get('/all-services', async (req, res) => {
     try {
         const services = await prisma.szolgaltatasok.findMany({
@@ -58,7 +58,6 @@ router.get('/all-services', async (req, res) => {
     }
 });
 
-// 3. Szakemberek lekérése adott szolgáltatáshoz
 router.get('/professionals/:serviceId', async (req, res) => {
     const servId = parseInt(req.params.serviceId);
     try {
@@ -80,7 +79,7 @@ router.get('/professionals/:serviceId', async (req, res) => {
     }
 });
 
-// 4. Elérhető idősávok kalkulációja
+// Elérhető idősávok kalkulációja
 router.get('/available-slots', async (req, res) => {
     const { employeeId, serviceId, date } = req.query;
     if (!employeeId || !serviceId || !date) {
@@ -202,7 +201,7 @@ router.get('/available-slots', async (req, res) => {
     }
 });
 
-// 5. időpont foglalása
+// időpont foglalása
 router.post('/book', verifyToken, async (req, res) => {
     const vendegId = req.user.id || req.user.felhasznalo_id;
     const { alkalmazott_id, szolgaltatas_id, datum, ido, megjegyzes } = req.body;
@@ -227,7 +226,6 @@ router.post('/book', verifyToken, async (req, res) => {
         if (!statusz) statusz = await prisma.foglalas_statuszok.findFirst();
 
         const result = await prisma.$transaction(async (tx) => {
-            // Lemondott foglalással (statusz_id: 3) nem ütközhet
             const conflict = await tx.foglalasok.findFirst({
                 where: {
                     alkalmazott_id: empId,
@@ -286,7 +284,7 @@ router.post('/book', verifyToken, async (req, res) => {
     }
 });
 
-// 6. Közelgő foglalások (csak a nem lemondottak jelennek meg!)
+//Közelgő foglalások
 router.get('/my-bookings/upcoming', verifyToken, async (req, res) => {
     const vendegId = req.user.id || req.user.felhasznalo_id;
 
@@ -339,7 +337,7 @@ router.get('/my-bookings/past', verifyToken, async (req, res) => {
     }
 });
 
-// 7. foglalás lemondása
+// foglalás lemondása
 router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
     const vendegId = req.user.id || req.user.felhasznalo_id;
     const bookingId = parseInt(req.params.id);
@@ -431,7 +429,7 @@ router.delete('/cancel-booking/:id', verifyToken, async (req, res) => {
     }
 });
 
-// 8. Feliratkozás várólistára
+//Feliratkozás várólistára
 router.post('/waitlist', verifyToken, async (req, res) => {
     const vendegId = req.user.id || req.user.felhasznalo_id;
     const { szolgaltatas_id, datum, idosav_tol, idosav_ig } = req.body;

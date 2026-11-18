@@ -20,7 +20,7 @@ const CookiePolicy = () => {
 
         <hr className="salon-divider my-4" style={{ opacity: 0.2 }} />
 
-        {/* 1. Hatály */}
+        {/* Hatály */}
         <div className="card-white p-4 mb-4 shadow-sm card-hover-effect">
           <h3 className="fw-bold fs-5 mb-3 text-salon">1. A tájékoztató hatálya</h3>
           <p className="m-0" style={{ lineHeight: '1.7' }}>
@@ -28,7 +28,7 @@ const CookiePolicy = () => {
           </p>
         </div>
 
-        {/* 2. Mik azok a sütik? */}
+        {/* Mik azok a sütik? */}
         <div className="card-white p-4 mb-4 shadow-sm card-hover-effect">
           <h3 className="fw-bold fs-5 mb-3 text-salon">2. Mik azok a sütik és a helyi tárolók (Local Storage)?</h3>
           <p className="mb-2" style={{ lineHeight: '1.7' }}>
@@ -39,7 +39,7 @@ const CookiePolicy = () => {
           </p>
         </div>
 
-        {/* 3. A tárolt adatok típusai és célja */}
+        {/*A tárolt adatok típusai és célja */}
         <div className="card-white p-4 mb-4 shadow-sm card-hover-effect">
           <h3 className="fw-bold fs-5 mb-3 text-salon">3. Az alkalmazott adatok típusai és célja</h3>
           
@@ -54,7 +54,7 @@ const CookiePolicy = () => {
           </p>
         </div>
 
-        {/* 4. Biztonság */}
+        {/*Biztonság */}
         <div className="card-white p-4 mb-4 shadow-sm card-hover-effect">
           <h3 className="fw-bold fs-5 mb-3 text-salon">4. Biztonság</h3>
           <p className="m-0" style={{ lineHeight: '1.7' }}>
@@ -62,7 +62,6 @@ const CookiePolicy = () => {
           </p>
         </div>
 
-        {/* Vissza gomb */}
         <div className="text-center pt-2">
           <Link to="/" className="btn btn-dark px-5 py-3 fs-5 shadow-sm">
             VISSZA A KEZDŐLAPRA

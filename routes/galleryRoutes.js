@@ -1,4 +1,4 @@
-// backend/routes/galleryRoutes.js
+//routes/galleryRoutes.js
 const express = require('express');
 const router = express.Router();
 const multer = require('multer');
@@ -50,7 +50,7 @@ const verifyToken = (req, res, next) => {
     });
 };
 
-// 1. PUBLIKUS: ÖSSZES KÉP LEKÉRÉSE (Bárki megtekintheti)
+// Képek lekérése a galériából (mindenki számára elérhető)
 router.get('/gallery', async (req, res) => {
     try {
         const kepek = await prisma.galeria.findMany({
@@ -68,7 +68,7 @@ router.get('/gallery', async (req, res) => {
     }
 });
 
-// 2. ALKALMAZOTTI: KÉPFELTÖLTÉS
+// Kép feltöltése a galériába
 router.post('/gallery/upload', verifyToken, upload.single('kep'), async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
 
@@ -93,7 +93,7 @@ router.post('/gallery/upload', verifyToken, upload.single('kep'), async (req, re
     }
 });
 
-// 3. ALKALMAZOTTI: KÉP TÖRLÉSE
+// Kép törlése
 router.delete('/gallery/:id', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
     const kepId = parseInt(req.params.id);
@@ -107,10 +107,8 @@ router.delete('/gallery/:id', verifyToken, async (req, res) => {
             return res.status(404).json({ success: false, message: "A kép nem található vagy nincs jogosultságod törölni." });
         }
 
-        // Törlés az adatbázisból
         await prisma.galeria.delete({ where: { kep_id: kepId } });
 
-        // Fizikai fájl törlése a szerverről
         const fileName = path.basename(kep.kep_url);
         const filePath = path.join(uploadDir, fileName);
         if (fs.existsSync(filePath)) {

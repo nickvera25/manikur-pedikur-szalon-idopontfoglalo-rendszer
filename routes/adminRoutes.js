@@ -1,4 +1,4 @@
-// backend/routes/adminRoutes.js
+//routes/adminRoutes.js
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
@@ -6,7 +6,7 @@ const dayjs = require('dayjs');
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// Token & Admin jogosultság ellenőrzése
+// Token és admin jogosultság ellenőrzése
 const verifyAdmin = async (req, res, next) => {
     const authHeader = req.headers['authorization'];
     if (!authHeader) return res.status(401).json({ success: false, message: "Bejelentkezés szükséges!" });
@@ -61,7 +61,6 @@ router.get('/statistics', verifyAdmin, async (req, res) => {
         const closedCount = completedCount + noShowCount;
         const attendanceRate = closedCount > 0 ? Math.round((completedCount / closedCount) * 100) : null;
 
-        // 2. Szolgáltatások népszerűsége (Darabszám szerint rendezve)
         const serviceMap = {};
         bookings.forEach(b => {
             const id = b.szolgaltatas_id;
@@ -111,7 +110,7 @@ router.get('/statistics', verifyAdmin, async (req, res) => {
     }
 });
 
-// Admin összesített naptár eseményei
+// Admin összesített naptár
 router.get('/calendar-events', verifyAdmin, async (req, res) => {
     const { employeeId } = req.query;
 
@@ -121,7 +120,6 @@ router.get('/calendar-events', verifyAdmin, async (req, res) => {
             whereClause.alkalmazott_id = parseInt(employeeId);
         }
 
-        // Csak a nem lemondott foglalások jelennek meg a naptárban
         const bookings = await prisma.foglalasok.findMany({
             where: {
                 ...whereClause,
@@ -135,7 +133,6 @@ router.get('/calendar-events', verifyAdmin, async (req, res) => {
             }
         });
 
-        // A szabadságok táblában nincs statusz_id, így oda az eredeti whereClause megy
         const vacations = await prisma.szabadsagok.findMany({
             where: whereClause,
             include: {

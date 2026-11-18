@@ -1,4 +1,4 @@
-// backend/routes/employeeRoutes.js
+//routes/employeeRoutes.js
 const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
@@ -21,7 +21,7 @@ const verifyToken = (req, res, next) => {
     });
 };
 
-// 1. BEJELENTKEZETT ALKALMAZOTT MUNKARENDJÉNEK LEKÉRÉSE
+// Bejelentkezett alkalmazott munkarendjének lekérése
 router.get('/munkarend', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
 
@@ -38,7 +38,7 @@ router.get('/munkarend', verifyToken, async (req, res) => {
     }
 });
 
-// 2. MUNKAREND MENTÉSE (A tokenből olvasott ID alapján!)
+// Munkarend mentése / frissítése
 router.post('/munkarend', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
     const { hetiBeosztas } = req.body;
@@ -72,7 +72,7 @@ router.post('/munkarend', verifyToken, async (req, res) => {
     }
 });
 
-// 3. TÁVOLLÉTEK / SZABADSÁGOK LEKÉRÉSE
+// Távollétek / szabadságok lekérése
 router.get('/szabadsagok', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
 
@@ -88,7 +88,7 @@ router.get('/szabadsagok', verifyToken, async (req, res) => {
     }
 });
 
-// 4. ÚJ TÁVOLLÉT / SZABADSÁG FELVÉTELE + ÜTKÖZŐ FOGLALÁSOK STÁTUSZÁNAK ÁLLÍTÁSA LEMONDVÁRA
+// Új távollét / szabadság rögzítése
 router.post('/szabadsagok', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
     const { kezdo_datum, veg_datum, megjegyzes } = req.body;
@@ -165,7 +165,7 @@ router.post('/szabadsagok', verifyToken, async (req, res) => {
     }
 });
 
-// 5. TÁVOLLÉT TÖRLÉSE
+// Távollét / szabadság törlése
 router.delete('/szabadsagok/:id', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
     const szabId = parseInt(req.params.id);
@@ -183,12 +183,11 @@ router.delete('/szabadsagok/:id', verifyToken, async (req, res) => {
     }
 });
 
-// 6. ALKALMAZOTTI NAPTÁR ESEMÉNYEINEK LEKÉRÉSE
+// Alkalmazott naptár lekérése (foglalások + távollétek)
 router.get('/employee-calendar', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
 
     try {
-        // 1. Foglalások lekérése (a lemondottakat nem jelenítjük meg)
         const bookings = await prisma.foglalasok.findMany({
             where: { 
                 alkalmazott_id: empId,
@@ -201,7 +200,6 @@ router.get('/employee-calendar', verifyToken, async (req, res) => {
             }
         });
 
-        // 2. Szabadságok és távollétek lekérése
         const vacations = await prisma.szabadsagok.findMany({
             where: { alkalmazott_id: empId }
         });
@@ -249,7 +247,7 @@ router.get('/employee-calendar', verifyToken, async (req, res) => {
     }
 });
 
-// 7. ALKALMAZOTTI IDŐPONT LEMONDÁS
+//Alkalmazott által lemondott foglalás kezelése
 router.delete('/cancel-appointment/:id', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
     const bookingId = parseInt(req.params.id);
@@ -327,7 +325,7 @@ router.delete('/cancel-appointment/:id', verifyToken, async (req, res) => {
     }
 });
 
-// MAI BEOSZTÁS LEKÉRÉSE AZ ALKALMAZOTTI KEZDŐOLDALHOZ
+// Mai beosztás lekérése
 router.get('/today-schedule', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
 
@@ -359,7 +357,7 @@ router.get('/today-schedule', verifyToken, async (req, res) => {
     }
 });
 
-// KEZELÉS STÁTUSZÁNAK FRISSÍTÉSE (Jóváhagyva / Teljesítve / Lemondva)
+// Kezelés státuszának frissítése
 router.put('/update-appointment-status/:id', verifyToken, async (req, res) => {
     const empId = req.user.id || req.user.felhasznalo_id;
     const bookingId = parseInt(req.params.id);

@@ -28,7 +28,6 @@ const Navbar = () => {
     <nav className="navbar navbar-expand-lg custom-navbar py-2">
       <div className="container-fluid px-3 px-lg-5">
         
-        {/* Logó és Cím */}
         <Link 
           className="navbar-brand d-flex align-items-center fw-bold fs-4 m-0 figma-text-effect" 
           to={getHomeLink()}
@@ -42,7 +41,6 @@ const Navbar = () => {
           <span style={{ letterSpacing: '0.5px' }}>NAILS BY VERA</span>
         </Link>
         
-        {/* Hamburger gomb mobilon (csak ez csukja be és nyitja ki a menüt) */}
         <button 
           className={`navbar-toggler border-0 shadow-none ${isNavCollapsed ? 'collapsed' : ''}`}
           type="button" 
@@ -53,7 +51,6 @@ const Navbar = () => {
           <span className="navbar-toggler-icon"></span>
         </button>
 
-        {/* Lenyíló menü animációval */}
         <div className={`collapse navbar-collapse justify-content-end ${!isNavCollapsed ? 'show mobile-nav-animated' : ''}`} id="navbarNav">
           <ul className="navbar-nav align-items-lg-center text-center text-lg-start pt-3 pt-lg-0">
             
@@ -90,7 +87,6 @@ const Navbar = () => {
                       ></i>
                     </span>
 
-                    {/* Figma stílusú almenü aláhúzásos/félkövér kiemeléssel */}
                     <ul className={`dropdown-menu figma-dropdown-menu ${isDropdownOpen ? 'show' : ''}`}>
                       <li>
                         <Link className="dropdown-item figma-dropdown-item" to="/foglalas">
@@ -174,7 +170,6 @@ const Navbar = () => {
       </div>
 
 <style>{`
-        /* --- FIGMA SZÖVEGÁRNYÉK --- */
         .figma-text-effect {
           text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.28) !important;
           color: var(--text-and-btn, #4a3b32) !important;
@@ -186,7 +181,6 @@ const Navbar = () => {
           opacity: 0.95;
         }
 
-        /* --- ASZTALI NÉZET: FIGMA DROPDOWN & FIX HOVER HÍD --- */
         @media (min-width: 992px) {
           .figma-dropdown-menu {
             border: 1px solid rgba(0, 0, 0, 0.2) !important;
@@ -198,7 +192,6 @@ const Navbar = () => {
             margin-top: 4px !important;
           }
 
-          /* LÁTHATATLAN HÍD: megakadályozza, hogy az egér lehúzásakor becsukódjon a menü */
           .figma-dropdown-menu::before {
             content: '';
             position: absolute;
@@ -209,7 +202,6 @@ const Navbar = () => {
             background: transparent;
           }
 
-          /* Lágy lebegő megjelenési animáció */
           .figma-dropdown-menu.show {
             animation: dropdownEntrance 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
           }
@@ -232,7 +224,6 @@ const Navbar = () => {
           }
         }
 
-        /* --- MOBIL NÉZET: LÁGY LECSÚSZÓ ANIMÁCIÓ --- */
         @media (max-width: 991.98px) {
           .navbar-collapse {
             background: transparent !important;
@@ -281,7 +272,6 @@ const Navbar = () => {
           }
         }
 
-        /* Kulcskockák */
         @keyframes dropdownEntrance {
           from {
             opacity: 0;

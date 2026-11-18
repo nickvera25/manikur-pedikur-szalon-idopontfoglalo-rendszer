@@ -1,9 +1,9 @@
+//routes/adminServiceRoutes.js
 const express = require('express');
 const router = express.Router();
 const { PrismaClient } = require('@prisma/client');
 const prisma = new PrismaClient();
 
-// 1. ÖSSZES SZOLGÁLTATÁS LEKÉRÉSE
 router.get('/services', async (req, res) => {
     try {
         const services = await prisma.szolgaltatasok.findMany({
@@ -16,7 +16,6 @@ router.get('/services', async (req, res) => {
     }
 });
 
-// 1.5 KATEGÓRIÁK LEKÉRÉSE
 router.get('/categories', async (req, res) => {
     try {
         const categories = await prisma.kategoriak.findMany();
@@ -27,7 +26,7 @@ router.get('/categories', async (req, res) => {
     }
 });
 
-// 1.6 ÚJ KATEGÓRIA LÉTREHOZÁSA
+//új kategória hozzáadása
 router.post('/categories', async (req, res) => {
     const { nev } = req.body;
     if (!nev) return res.status(400).json({ success: false, message: "Kategória neve kötelező!" });
@@ -43,7 +42,7 @@ router.post('/categories', async (req, res) => {
     }
 });
 
-// 2. ÚJ SZOLGÁLTATÁS HOZZÁADÁSA
+//Új szolgáltatás hozzáadása
 router.post('/services', async (req, res) => {
     const { nev, ar, idotartam, kategoria_id, leiras } = req.body;
     if (!nev || !ar || !idotartam) return res.status(400).json({ success: false, message: "Név, ár és időtartam kötelező!" });
@@ -64,7 +63,7 @@ router.post('/services', async (req, res) => {
     }
 });
 
-// 3. SZOLGÁLTATÁS MÓDOSÍTÁSA (PUT)
+//Szolgáltatás módosítása
 router.put('/services/:id', async (req, res) => {
     const { id } = req.params;
     const { nev, ar, idotartam, kategoria_id, leiras } = req.body;
@@ -86,13 +85,12 @@ router.put('/services/:id', async (req, res) => {
     }
 });
 
-// 4. SZOLGÁLTATÁS TÖRLÉSE
+//Szolgáltatás törlése
 router.delete('/services/:id', async (req, res) => {
     const { id } = req.params;
     const serviceId = parseInt(id);
 
     try {
-        // 1. Ellenőrizzük, van-e rá már foglalás
         const bookingCount = await prisma.foglalasok.count({
             where: { szolgaltatas_id: serviceId }
         });
@@ -125,7 +123,7 @@ router.delete('/services/:id', async (req, res) => {
     }
 });
 
-// 1.7 KATEGÓRIA TÖRLÉSE (Csak ha üres)
+// Kategória törlése
 router.delete('/categories/:id', async (req, res) => {
     const { id } = req.params;
 

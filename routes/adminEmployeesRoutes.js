@@ -1,3 +1,4 @@
+//routes/adminRoutes.js
 const express = require('express');
 const router = express.Router();
 const bcrypt = require('bcrypt');
@@ -62,7 +63,7 @@ router.post('/employees', async (req, res) => {
     }
 });
 
-// ÚJ: ALKALMAZOTT MÓDOSÍTÁSA
+//Alkalmazott módosítása
 router.put('/employees/:id', async (req, res) => {
     const { id } = req.params;
     const { vezeteknev, keresztnev, email, telefonszam, szolgaltatas_id_lista } = req.body;
@@ -73,7 +74,6 @@ router.put('/employees/:id', async (req, res) => {
             data: { vezeteknev, keresztnev, email, telefon: telefonszam || null }
         });
 
-        // Szolgáltatások törlése, majd újra felvitele
         await prisma.alkalmazott_szolgaltatasok.deleteMany({
             where: { alkalmazott_id: parseInt(id) }
         });
@@ -97,7 +97,6 @@ router.delete('/employees/:id', async (req, res) => {
     const empId = parseInt(id);
 
     try {
-        // 1. Ellenőrizzük, tartozik-e hozzá foglalás
         const bookingsCount = await prisma.foglalasok.count({
             where: { alkalmazott_id: empId }
         });
@@ -114,7 +113,6 @@ router.delete('/employees/:id', async (req, res) => {
         await prisma.munkarend.deleteMany({ where: { alkalmazott_id: empId } });
         await prisma.szabadsagok.deleteMany({ where: { alkalmazott_id: empId } });
 
-        // 3. Felhasználó törlése
         await prisma.felhasznalok.delete({
             where: { felhasznalo_id: empId }
         });

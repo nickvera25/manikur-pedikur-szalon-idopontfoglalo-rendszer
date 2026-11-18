@@ -36,7 +36,6 @@ import AdminStatistics from './pages/AdminStatistics';
 const AppContent = () => {
   const location = useLocation();
 
-  // AUTOMATIKUS FELGÖRGETÉS MINDEN OLDALVÁLTÁSKOR (Külön fájl nélkül)
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
