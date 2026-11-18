@@ -92,7 +92,6 @@ const Profile = () => {
     <div className="container mt-5 mb-5 d-flex justify-content-center">
       <div className="card-pink p-4 p-md-5 w-100 shadow-sm" style={{ maxWidth: '650px' }}>
         
-        {/* Személyes adatok szekció */}
         <h2 className="fw-bold text-center mb-4">Személyes adataim</h2>
         
         {dataMessage.text && (

@@ -32,7 +32,6 @@ const Home = () => {
     fetchData();
   }, []);
 
-  // Finom görgetési animáció az egyetlen dobozon belüli szekcióknak
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
@@ -58,10 +57,8 @@ const Home = () => {
   return (
     <div className="container mt-4 mt-md-5 mb-5 d-flex justify-content-center px-2 px-sm-3">
       
-      {/* EGYETLEN NAGY ÖSSZEFÜGGŐ DOBOZ AZ EGÉSZ FŐOLDALNAK */}
       <div className="card-pink p-4 p-md-5 w-100 shadow-sm" style={{ maxWidth: '1200px' }}>
         
-        {/* 1. RÉSZ: BEVEZETŐ (HERO) */}
         <section className="scroll-fade-in">
           <div className="row align-items-center">
             <div className="col-lg-6 mb-4 mb-lg-0 pe-lg-5">
@@ -93,7 +90,6 @@ const Home = () => {
           </div>
         </section>
 
-        {/* FINOM BELSŐ ELVÁLASZTÓ */}
         <hr className="salon-divider my-4" style={{ opacity: 0.2 }} />
 
         <section className="scroll-fade-in">
@@ -132,10 +128,8 @@ const Home = () => {
           </div>
         </section>
 
-        {/* FINOM BELSŐ ELVÁLASZTÓ */}
         <hr className="salon-divider my-4" style={{ opacity: 0.2 }} />
 
-        {/* 3. RÉSZ: SZOLGÁLTATÁSAINK & ÁRAINK */}
         <section className="scroll-fade-in">
           <h2 className="fw-bold mb-3 text-center">Szolgáltatásaink & Áraink</h2>
           <p className="text-center mb-4 mx-auto" style={{ maxWidth: '650px' }}>
@@ -208,7 +202,6 @@ const Home = () => {
       </div>
 
       <style>{`
-        /* Kártyák lágy felemelkedése egérrel */
         .card-white {
           transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
@@ -217,7 +210,6 @@ const Home = () => {
           box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08) !important;
         }
 
-        /* Diszkrét felúszás görgetéskor a nagy kártyán belül */
         .scroll-fade-in {
           opacity: 0;
           transform: translateY(20px);

@@ -93,7 +93,6 @@ const Welcome = () => {
               <div className="d-flex flex-column justify-content-center flex-grow-1 w-100">
                 <h3 className="fw-bold m-0 mb-3" style={{ fontSize: '1.35rem' }}>
                   Közelgő időpontod:
-                  {/* d-block révén új sorba kerül, így soha nem nyomja ki a kártyát */}
                   <span className="fw-normal d-block mt-1 text-muted" style={{ fontSize: '1.15rem' }}>
                     {loading ? "Betöltés..." : nextBooking ? dayjs(nextBooking.kezdo_idopont).format('YYYY.MM.DD. HH:mm') : "Nincs"}
                   </span>
